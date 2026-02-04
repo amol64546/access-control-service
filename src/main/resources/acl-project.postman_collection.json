@@ -1,0 +1,358 @@
+{
+	"info": {
+		"_postman_id": "0975e05c-d98c-45f1-ba64-7cc27a600250",
+		"name": "acl-project",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "28227974"
+	},
+	"item": [
+		{
+			"name": "Groups",
+			"item": [
+				{
+					"name": "create group",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"groupId\": \"engineers\",\n  \"groupName\": \"Engineering Team\",\n  \"ownerId\": \"f1412d85-7545-4d50-b437-7b6d193f8f5e\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/groups",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"groups"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add admin",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"adminId\": \"bob\",\n  \"requesterId\": \"alice\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/groups/engineers/admins",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"groups",
+								"engineers",
+								"admins"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add member",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"memberId\": \"charlie\",\n  \"requesterId\": \"bob\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/groups/engineers/members",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"groups",
+								"engineers",
+								"members"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "grant group access",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"resourceType\": \"dataverse\",\n  \"resourceId\": \"65b573a1-9dff-40e6-8792-87323bb41aff\",\n  \"groupId\": \"engineers\",\n  \"relation\": \"editor\",\n  \"requesterId\": \"f1412d85-7545-4d50-b437-7b6d193f8f5e\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/groups/access/grant",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"groups",
+								"access",
+								"grant"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Transfer group ownership",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"newOwnerId\": \"dataverse\",\n    \"currentOwnerId\": \"65b573a1-9dff-40e6-8792-87323bb41aff\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/groups/{groupId}/transfer-ownership",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"groups",
+								"{groupId}",
+								"transfer-ownership"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Resources",
+			"item": [
+				{
+					"name": "create resource",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"parentResourceType\": \"bigquery\",\n    \"parentResourceId\": \"1762260a-aa75-4caa-ae65-a2fd3c0b15ec\",\n    \"requesterId\": \"f1412d85-7545-4d50-b437-7b6d193f8f5e\",\n    \"resourceType\": \"dataverse\",\n    \"resourceId\": \"{{$randomUUID}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/resources",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"resources"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "grant permission",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ownerSubjectId\": \"f1412d85-7545-4d50-b437-7b6d193f8f5e\",\n    \"targetSubjectId\": \"bdfb69a7-aea4-43d8-9b79-9fc72db9c970\",\n    \"resourceType\": \"dataverse\",\n    \"resourceId\": \"ed050eee-d4a0-4be2-8b60-aff5980ad54b\",\n    \"relation\": \"editor\",\n    \"conditionalPermission\" : {\n        \"platformId\" : \"\",\n        \"appId\" : \"\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/resources/grant",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"resources",
+								"grant"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "check permission",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"requesterId\": \"bdfb69a7-aea4-43d8-9b79-9fc72db9c970\",\n    \"resourceType\": \"dataverse\",\n    \"resourceId\": \"a4df755c-7138-475b-866a-d08be4e3f1cb\",\n    \"permission\": \"edit\",\n    \"conditionalPermission\": {\n        \"platformId\": \"\",\n        \"appId\": \"\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/resources",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"resources"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get all resource relations",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/resources/hierarchy?resourceType=schema&resourceId=d12ca7c0-3896-4b3a-ae67-59d37875fed8&requesterId=f1412d85-7545-4d50-b437-7b6d193f8f5e",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"resources",
+								"hierarchy"
+							],
+							"query": [
+								{
+									"key": "resourceType",
+									"value": "schema"
+								},
+								{
+									"key": "resourceId",
+									"value": "d12ca7c0-3896-4b3a-ae67-59d37875fed8"
+								},
+								{
+									"key": "requesterId",
+									"value": "f1412d85-7545-4d50-b437-7b6d193f8f5e"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "revoke permission",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ownerSubjectId\": \"f1412d85-7545-4d50-b437-7b6d193f8f5e\",\n    \"targetSubjectId\": \"bdfb69a7-aea4-43d8-9b79-9fc72db9c970\",\n    \"resourceType\": \"dataverse\",\n    \"resourceId\": \"ed050eee-d4a0-4be2-8b60-aff5980ad54b\",\n    \"relation\": \"editor\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/resources/revoke",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"resources",
+								"revoke"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete resource",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"requesterId\": \"f1412d85-7545-4d50-b437-7b6d193f8f5e\",\n    \"resourceType\": \"dataverse\",\n    \"resourceId\": \"7d1ef594-5e5a-4899-aeff-cbf91fc182ef\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/resources",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"resources"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

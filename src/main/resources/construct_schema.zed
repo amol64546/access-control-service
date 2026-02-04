@@ -1,0 +1,78 @@
+caveat platform_app_match(platformId string, appId string) {
+    platformId != "" && appId != ""
+}
+
+definition tenant {}
+
+definition group {
+    relation owner: tenant
+    relation admin: tenant
+    relation member: tenant
+
+    permission manage_members = owner + admin
+    permission delete_group = owner
+}
+
+definition dataverse {
+    relation owner: tenant
+    relation editor: tenant with platform_app_match | group#member with platform_app_match
+    relation viewer: tenant with platform_app_match | group#member with platform_app_match
+
+    permission delete = owner
+    permission write  = owner + editor
+    permission read   = viewer + write
+    permission grant  = owner
+    permission revoke = owner
+}
+
+definition schema {
+    relation parent: dataverse
+    relation owner: tenant
+    relation editor: tenant with platform_app_match | group#member with platform_app_match
+    relation viewer: tenant with platform_app_match | group#member with platform_app_match
+
+    permission delete = owner
+    permission write  = owner + editor + parent->write
+    permission read   = viewer + write + parent->read
+    permission grant  = owner
+    permission revoke = owner
+}
+
+definition cohort {
+    relation parent: schema
+    relation owner: tenant
+    relation editor: tenant with platform_app_match | group#member with platform_app_match
+    relation viewer: tenant with platform_app_match | group#member with platform_app_match
+
+    permission delete = owner
+    permission write  = owner + editor + parent->write
+    permission read   = viewer + write + parent->read
+    permission grant  = owner
+    permission revoke = owner
+}
+
+definition bigquery {
+    relation parent: schema
+    relation owner: tenant
+    relation editor: tenant with platform_app_match | group#member with platform_app_match
+    relation viewer: tenant with platform_app_match | group#member with platform_app_match
+
+    permission delete = owner
+    permission write  = owner + editor + parent->write
+    permission read   = viewer + write + parent->read
+    permission grant  = owner
+    permission revoke = owner
+}
+
+definition template {
+    relation parent: cohort | bigquery
+    relation owner: tenant
+    relation editor: tenant with platform_app_match | group#member with platform_app_match
+    relation viewer: tenant with platform_app_match | group#member with platform_app_match
+
+    permission delete = owner
+    permission write  = owner + editor + parent->write
+    permission read   = viewer + write + parent->read
+    permission grant  = owner
+    permission revoke = owner
+}
