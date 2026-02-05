@@ -15,8 +15,8 @@ definition group {
 
 definition dataverse {
     relation owner: tenant
-    relation editor: tenant with platform_app_match | group#member with platform_app_match
-    relation viewer: tenant with platform_app_match | group#member with platform_app_match
+    relation editor: tenant | tenant with platform_app_match | group#member | group#member with platform_app_match
+    relation viewer: tenant | tenant with platform_app_match | group#member | group#member with platform_app_match
 
     permission delete = owner
     permission write  = owner + editor
@@ -28,8 +28,8 @@ definition dataverse {
 definition schema {
     relation parent: dataverse
     relation owner: tenant
-    relation editor: tenant with platform_app_match | group#member with platform_app_match
-    relation viewer: tenant with platform_app_match | group#member with platform_app_match
+    relation editor: tenant | tenant with platform_app_match | group#member | group#member with platform_app_match
+    relation viewer: tenant | tenant with platform_app_match | group#member | group#member with platform_app_match
 
     permission delete = owner
     permission write  = owner + editor + parent->write
@@ -41,8 +41,8 @@ definition schema {
 definition cohort {
     relation parent: schema
     relation owner: tenant
-    relation editor: tenant with platform_app_match | group#member with platform_app_match
-    relation viewer: tenant with platform_app_match | group#member with platform_app_match
+    relation editor: tenant | tenant with platform_app_match | group#member | group#member with platform_app_match
+    relation viewer: tenant | tenant with platform_app_match | group#member | group#member with platform_app_match
 
     permission delete = owner
     permission write  = owner + editor + parent->write
@@ -54,8 +54,8 @@ definition cohort {
 definition bigquery {
     relation parent: schema
     relation owner: tenant
-    relation editor: tenant with platform_app_match | group#member with platform_app_match
-    relation viewer: tenant with platform_app_match | group#member with platform_app_match
+    relation editor: tenant | tenant with platform_app_match | group#member | group#member with platform_app_match
+    relation viewer: tenant | tenant with platform_app_match | group#member | group#member with platform_app_match
 
     permission delete = owner
     permission write  = owner + editor + parent->write
@@ -67,8 +67,8 @@ definition bigquery {
 definition template {
     relation parent: cohort | bigquery
     relation owner: tenant
-    relation editor: tenant with platform_app_match | group#member with platform_app_match
-    relation viewer: tenant with platform_app_match | group#member with platform_app_match
+    relation editor: tenant | tenant with platform_app_match | group#member | group#member with platform_app_match
+    relation viewer: tenant | tenant with platform_app_match | group#member | group#member with platform_app_match
 
     permission delete = owner
     permission write  = owner + editor + parent->write
