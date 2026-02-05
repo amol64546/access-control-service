@@ -21,7 +21,6 @@ import static com.acl.project.utils.constants.*;
 @Slf4j
 public class AuthorizationService {
 
-
   private final PermissionsServiceGrpc.PermissionsServiceBlockingStub permissionsClient;
 
   public void writeRelationship(String resourceType, String resourceId,
@@ -137,14 +136,14 @@ public class AuthorizationService {
 
     if (StringUtils.isNotBlank(conditionalPermissionRequest.getPlatformId())) {
       contextBuilder.putFields(
-        PLATFORM_ID,
+        SUPPLIED_PLATFORM_ID,
         Value.newBuilder().setStringValue(conditionalPermissionRequest.getPlatformId()).build()
       );
     }
 
     if (StringUtils.isNotBlank(conditionalPermissionRequest.getAppId())) {
       contextBuilder.putFields(
-        APP_ID,
+        SUPPLIED_APP_ID,
         Value.newBuilder().setStringValue(conditionalPermissionRequest.getAppId()).build()
       );
     }

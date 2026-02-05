@@ -1,5 +1,5 @@
-caveat platform_app_match(platformId string, appId string) {
-    platformId != "" && appId != ""
+caveat platform_app_match(platformId string, appId string, supplied_platformId string, supplied_appId string) {
+    platformId == supplied_platformId && appId == supplied_appId
 }
 
 definition tenant {}

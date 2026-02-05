@@ -22,4 +22,6 @@ public class constants {
   public static final String APP_ID = "appId";
   public static final String PLATFORM_ID = "platformId";
   public static final String CAVEAT_NAME = "platform_app_match";
+  public static final String SUPPLIED_PLATFORM_ID = "supplied_platformId";
+  public static final String SUPPLIED_APP_ID = "supplied_appId";
 }
