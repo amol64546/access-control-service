@@ -1,5 +1,6 @@
 package com.acl.project.dto;
 
+import com.acl.project.enums.Resource;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
@@ -15,12 +16,10 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class CreateResource {
 
-  private String requesterId;
-
-  private String resourceType;
+  private Resource resource;
   private String resourceId;
 
-  private String parentResourceType;
+  private String parentResource;
   private String parentResourceId;
 
   @Override

@@ -1,4 +1,6 @@
 package com.acl.project.dto;
+import com.acl.project.enums.Relation;
+import com.acl.project.enums.Resource;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
@@ -11,9 +13,8 @@ import lombok.NoArgsConstructor;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class GroupAccessRequest {
-    private String resourceType;
+
+    private Resource resource;
     private String resourceId;
-    private String groupId;
-    private String relation; // "editor", "viewer", "writer", "reader", "member"
-    private String requesterId; // Who is making the request
+    private Relation relation;
 }

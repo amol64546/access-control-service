@@ -1,6 +1,10 @@
 package com.acl.project.controllers;
 
-import com.acl.project.dto.*;
+import com.acl.project.dto.CreateResource;
+import com.acl.project.dto.HierarchyResponse;
+import com.acl.project.dto.PermissionCheckRequest;
+import com.acl.project.dto.PermissionRequest;
+import com.acl.project.enums.Resource;
 import com.acl.project.services.HierarchyService;
 import com.acl.project.services.ResourceService;
 import lombok.RequiredArgsConstructor;
@@ -19,47 +23,53 @@ public class ResourceController {
 
   @PostMapping
   public ResponseEntity<?> create(
-    @RequestBody CreateResource createResource) {
+    @RequestBody CreateResource createResource,
+    @RequestHeader String tenantId) {
     log.info("Create Request: {}", createResource);
-    return ResponseEntity.ok(resourceService.createResource(createResource));
+    return ResponseEntity.ok(resourceService.createResource(createResource, tenantId));
   }
 
   @GetMapping
   public ResponseEntity<Boolean> checkPermission(
-    @RequestBody PermissionCheckRequest permissionCheckRequest) {
+    @RequestBody PermissionCheckRequest permissionCheckRequest,
+    @RequestHeader String tenantId) {
     log.info("Permission Check Request: {}", permissionCheckRequest);
-    return ResponseEntity.ok(resourceService.checkPermission(permissionCheckRequest));
+    return ResponseEntity.ok(resourceService.checkPermission(permissionCheckRequest, tenantId));
   }
 
   @DeleteMapping
   public ResponseEntity<?> delete(
-    @RequestBody DeleteResource deleteResource) {
-    log.info("Delete Request: {}", deleteResource);
-    return resourceService.deleteResource(deleteResource);
+    @RequestParam Resource resource,
+    @RequestParam String resourceId,
+    @RequestHeader String tenantId) {
+    log.info("Delete Request: {}", resource);
+    return resourceService.deleteResource(resource, resourceId, tenantId);
   }
 
   @PostMapping("/grant")
   public ResponseEntity<?> grant(
-    @RequestBody AccessRequest accessRequest) {
-    log.info("Grant Request: {}", accessRequest);
-    return resourceService.grantPermission(accessRequest);
+    @RequestBody PermissionRequest permissionRequest,
+    @RequestHeader String tenantId) {
+    log.info("Grant Request: {}", permissionRequest);
+    return resourceService.grantPermission(permissionRequest, tenantId);
   }
 
   @DeleteMapping("/revoke")
   public ResponseEntity<?> Revoke(
-    @RequestBody AccessRequest accessRequest) {
-    log.info("Revoke Request: {}", accessRequest);
-    return resourceService.revokePermission(accessRequest);
+    @RequestBody PermissionRequest permissionRequest,
+    @RequestHeader String tenantId) {
+    log.info("Revoke Request: {}", permissionRequest);
+    return resourceService.revokePermission(permissionRequest, tenantId);
   }
 
   @GetMapping("/hierarchy")
   public ResponseEntity<HierarchyResponse> getCompleteHierarchy(
-    @RequestParam String resourceType,
+    @RequestParam Resource resource,
     @RequestParam String resourceId,
-    @RequestParam String requesterId) {
-    log.info("Get complete hierarchy for {}:{}", resourceType, resourceId);
+    @RequestHeader String tenantId) {
+    log.info("Get complete hierarchy for {}:{}", resource, resourceId);
     return ResponseEntity.ok(
-      hierarchyService.getCompleteHierarchy(resourceType, resourceId, requesterId)
+      hierarchyService.getCompleteHierarchy(resource, resourceId, tenantId)
     );
   }
 }

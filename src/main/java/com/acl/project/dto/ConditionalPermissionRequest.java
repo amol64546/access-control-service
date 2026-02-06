@@ -12,6 +12,6 @@ import lombok.NoArgsConstructor;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ConditionalPermissionRequest {
-  private String platformId;
-  private String appId;
+
+  private String password;
 }

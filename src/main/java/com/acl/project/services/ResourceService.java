@@ -1,11 +1,14 @@
 package com.acl.project.services;
 
-import com.acl.project.dto.AccessRequest;
 import com.acl.project.dto.CreateResource;
 import com.acl.project.dto.DeleteResource;
 import com.acl.project.dto.PermissionCheckRequest;
+import com.acl.project.dto.PermissionRequest;
+import com.acl.project.enums.Permission;
+import com.acl.project.enums.Relation;
+import com.acl.project.enums.Resource;
+import com.acl.project.enums.Subject;
 import com.acl.project.exception.ApiException;
-import com.acl.project.exception.ErrorObject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
@@ -14,7 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import static com.acl.project.utils.constants.*;
+import static com.acl.project.utils.constants.TENANT;
 
 @Slf4j
 @Service
@@ -23,102 +26,98 @@ public class ResourceService {
 
   private final AuthorizationService authorizationService;
 
-  public Object createResource(CreateResource request) {
+  public Object createResource(CreateResource request, String tenantId) {
     authorizationService.writeRelationship(
-      request.getResourceType(), request.getResourceId(),
-      OWNER, TENANT, request.getRequesterId()
+      request.getResource(), request.getResourceId(),
+      Relation.OWNER, TENANT, tenantId
     );
 
     // Set parent hierarchy if provided
-    if (StringUtils.isNotBlank(request.getParentResourceType())
+    if (StringUtils.isNotBlank(request.getParentResource())
       && StringUtils.isNotBlank(request.getParentResourceId())) {
 
       authorizationService.writeRelationship(
-        request.getResourceType(),
+        request.getResource(),
         request.getResourceId(),
-        PARENT,
-        request.getParentResourceType(),
+        Relation.PARENT,
+        request.getParentResource(),
         request.getParentResourceId()
       );
 
       log.info("Created hierarchy: {} -> {} ({}:{})",
-        request.getResourceType() + ":" + request.getResourceId(),
-        PARENT,
-        request.getParentResourceType(),
+        request.getResource() + ":" + request.getResourceId(),
+        Relation.PARENT,
+        request.getParentResource(),
         request.getParentResourceId()
       );
     }
     return request;
   }
 
-  public boolean checkPermission(PermissionCheckRequest request) {
+  public boolean checkPermission(PermissionCheckRequest request, String tenantId) {
     if (ObjectUtils.isEmpty(request.getConditionalPermission())) {
       return authorizationService.checkPermission(
-        request.getResourceType(), request.getResourceId(),
-        request.getPermission(), TENANT, request.getRequesterId()
+        request.getResource(), request.getResourceId(),
+        request.getPermission(), Subject.TENANT, tenantId
       );
     } else {
       return authorizationService.checkPermission(
-        request.getResourceType(), request.getResourceId(),
-        request.getPermission(), TENANT, request.getRequesterId(),
+        request.getResource(), request.getResourceId(),
+        request.getPermission(), Subject.TENANT, tenantId,
         request.getConditionalPermission()
       );
     }
   }
 
-  public ResponseEntity<String> deleteResource(DeleteResource request) {
-    validatePermission(request.getRequesterId(), request.getResourceId(),
-      request.getResourceType(), DELETE);
+  public ResponseEntity<String> deleteResource(Resource resource, String resourceId, String tenantId) {
+    validatePermission(tenantId, resourceId,
+      resource, Permission.DELETE);
     authorizationService.deleteRelationship(
-      request.getResourceType(), request.getResourceId());
+      resource, resourceId);
     return ResponseEntity.ok("Delete the resource.");
   }
 
-  public ResponseEntity<String> grantPermission(AccessRequest request) {
+  public ResponseEntity<String> grantPermission(PermissionRequest request, String tenantId) {
     validateRelation(request.getRelation());
-    validatePermission(request.getOwnerSubjectId(), request.getResourceId(),
-      request.getResourceType(), GRANT);
+    validatePermission(tenantId, request.getResourceId(),
+      request.getResource(), Permission.GRANT);
     if (ObjectUtils.isEmpty(request.getConditionalPermission())) {
       authorizationService.writeRelationship(
-        request.getResourceType(), request.getResourceId(),
-        request.getRelation(), TENANT, request.getTargetSubjectId());
+        request.getResource(), request.getResourceId(),
+        request.getRelation(), TENANT, request.getUserId());
     } else {
       authorizationService.writeRelationship(
-        request.getResourceType(), request.getResourceId(),
-        request.getRelation(), TENANT, request.getTargetSubjectId(),
+        request.getResource(), request.getResourceId(),
+        request.getRelation(), Subject.TENANT, request.getUserId(),
         request.getConditionalPermission());
     }
 
     return ResponseEntity.ok("Permission granted successfully.");
   }
 
-  public ResponseEntity<String> revokePermission(AccessRequest request) {
+  public ResponseEntity<String> revokePermission(PermissionRequest request, String tenantId) {
     validateRelation(request.getRelation());
-    validatePermission(request.getOwnerSubjectId(), request.getResourceId(),
-      request.getResourceType(), REVOKE);
+    validatePermission(tenantId, request.getResourceId(),
+      request.getResource(), Permission.REVOKE);
     authorizationService.deleteRelationship(
-      request.getResourceType(), request.getResourceId(),
-      request.getRelation(), TENANT, request.getTargetSubjectId());
+      request.getResource(), request.getResourceId(),
+      request.getRelation(), Subject.TENANT, request.getUserId());
     return ResponseEntity.ok("Permission granted successfully.");
   }
 
-  private void validateRelation(String relation) {
-    if (relation.equalsIgnoreCase(OWNER)) {
-      throw new ApiException(ErrorObject.builder()
-        .httpStatus(HttpStatus.BAD_REQUEST)
-        .errorMessage("Subject is the owner of resource.")
-        .build());
+  private void validateRelation(Relation relation) {
+    if (relation.equals(Relation.OWNER)) {
+      throw new ApiException(HttpStatus.BAD_REQUEST,
+        "Subject is the owner of resource.");
     }
   }
 
   private void validatePermission(String subjectId, String resourceId,
-                                  String resourceType, String permission) {
+                                  Resource resourceType, Permission permission) {
     if (!authorizationService.checkPermission(resourceType, resourceId,
-      permission, TENANT, subjectId)) {
-      throw new ApiException(ErrorObject.builder()
-        .httpStatus(HttpStatus.FORBIDDEN)
-        .errorMessage("Subject does not have %s permission.".formatted(permission))
-        .build());
+      permission, Subject.TENANT, subjectId)) {
+      throw new ApiException(HttpStatus.FORBIDDEN,
+        "Subject does not have %s permission.".formatted(permission));
     }
   }
 

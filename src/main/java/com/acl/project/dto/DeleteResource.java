@@ -1,5 +1,6 @@
 package com.acl.project.dto;
 
+import com.acl.project.enums.Resource;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
@@ -14,9 +15,8 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DeleteResource {
-  private String requesterId;
 
-  private String resourceType;
+  private Resource resource;
   private String resourceId;
 
   @Override

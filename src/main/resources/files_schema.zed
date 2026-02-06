@@ -1,13 +1,13 @@
-caveat ip_prefix_match(ip string, supplied_ip string) {
-    supplied_ip.starts_with(ip)
+caveat password_match(password string, supplied_password string) {
+    supplied_password == password
 }
 
-definition user {}
+definition tenant {}
 
 definition organisation {
-    relation owner: user
-    relation admin: user
-    relation member: user
+    relation owner: tenant
+    relation admin: tenant
+    relation member: tenant
 
     permission manage_members = owner + admin
     permission delete = owner
@@ -17,9 +17,9 @@ definition organisation {
 
 definition group {
     relation parent: organisation
-    relation owner: user
-    relation admin: user
-    relation member: user
+    relation owner: tenant
+    relation admin: tenant
+    relation member: tenant
 
     permission manage_members = owner + admin
     permission delete = owner
@@ -28,9 +28,9 @@ definition group {
 
 definition folder {
     relation parent: folder | organisation
-    relation owner: user
-    relation editor: user | user with ip_prefix_match | group#member | group#member with ip_prefix_match
-    relation viewer: user | user with ip_prefix_match | group#member | group#member with ip_prefix_match
+    relation owner: tenant
+    relation editor: tenant | tenant with password_match | group#member | group#member with password_match
+    relation viewer: tenant | tenant with password_match | group#member | group#member with password_match
 
     permission delete = owner
     permission write  = owner + editor + parent->write
@@ -41,9 +41,9 @@ definition folder {
 
 definition file {
     relation parent: folder
-    relation owner: user
-    relation editor: user | user with ip_prefix_match | group#member | group#member with ip_prefix_match
-    relation viewer: user | user with ip_prefix_match | group#member | group#member with ip_prefix_match
+    relation owner: tenant
+    relation editor: tenant | tenant with password_match | group#member | group#member with password_match
+    relation viewer: tenant | tenant with password_match | group#member | group#member with password_match
 
     permission delete = owner
     permission write  = owner + editor + parent->write

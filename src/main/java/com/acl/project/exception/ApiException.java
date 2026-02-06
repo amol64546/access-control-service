@@ -1,10 +1,12 @@
 package com.acl.project.exception;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
+import org.springframework.http.HttpStatus;
 
-@Data
+@Getter
 @AllArgsConstructor
 public class ApiException extends RuntimeException {
-  private final ErrorObject errorObject;
+  private HttpStatus httpStatus;
+  private String errorMessage;
 }

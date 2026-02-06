@@ -2,6 +2,10 @@ package com.acl.project.services;
 
 import com.acl.project.dto.ConditionalPermissionRequest;
 import com.acl.project.dto.RelationshipInfo;
+import com.acl.project.enums.Permission;
+import com.acl.project.enums.Relation;
+import com.acl.project.enums.Resource;
+import com.acl.project.enums.Subject;
 import com.authzed.api.v1.*;
 import com.google.protobuf.Struct;
 import com.google.protobuf.Value;
@@ -23,20 +27,20 @@ public class AuthorizationService {
 
   private final PermissionsServiceGrpc.PermissionsServiceBlockingStub permissionsClient;
 
-  public void writeRelationship(String resourceType, String resourceId,
-                                String relation, String subjectType, String subjectId) {
+  public void writeRelationship(Resource resource, String resourceId,
+                                Relation relation, String subject, String subjectId) {
     WriteRelationshipsRequest request = WriteRelationshipsRequest.newBuilder()
       .addUpdates(RelationshipUpdate.newBuilder()
         .setOperation(RelationshipUpdate.Operation.OPERATION_TOUCH)
         .setRelationship(Relationship.newBuilder()
           .setResource(ObjectReference.newBuilder()
-            .setObjectType(resourceType)
+            .setObjectType(resource.name().toLowerCase())
             .setObjectId(resourceId)
             .build())
-          .setRelation(relation)
+          .setRelation(relation.name().toLowerCase())
           .setSubject(SubjectReference.newBuilder()
             .setObject(ObjectReference.newBuilder()
-              .setObjectType(subjectType)
+              .setObjectType(subject.toLowerCase())
               .setObjectId(subjectId)
               .build())
             .build())
@@ -49,33 +53,33 @@ public class AuthorizationService {
 
 
   public void writeRelationship(
-    String resourceType,
+    Resource resourceType,
     String resourceId,
-    String relation,
-    String subjectType,
+    Relation relation,
+    Subject subject,
     String subjectId,
     ConditionalPermissionRequest conditionalPermissionRequest
   ) {
 
     // Build caveat context (Struct)
     Struct.Builder contextBuilder = Struct.newBuilder();
-    if (StringUtils.isNotBlank(conditionalPermissionRequest.getPlatformId())) {
-      contextBuilder.putFields(CAVEAT_ALLOWED_KEY, Value.newBuilder().setStringValue(conditionalPermissionRequest.getPlatformId()).build());
+    if (StringUtils.isNotBlank(conditionalPermissionRequest.getPassword())) {
+      contextBuilder.putFields(CAVEAT_KEY, Value.newBuilder().setStringValue(conditionalPermissionRequest.getPassword()).build());
     }
 
     Relationship relationship =
       Relationship.newBuilder()
         .setResource(
           ObjectReference.newBuilder()
-            .setObjectType(resourceType)
+            .setObjectType(resourceType.name().toLowerCase())
             .setObjectId(resourceId)
             .build())
-        .setRelation(relation)
+        .setRelation(relation.name().toLowerCase())
         .setSubject(
           SubjectReference.newBuilder()
             .setObject(
               ObjectReference.newBuilder()
-                .setObjectType(subjectType)
+                .setObjectType(subject.name().toLowerCase())
                 .setObjectId(subjectId)
                 .build())
             .build())
@@ -99,17 +103,17 @@ public class AuthorizationService {
   }
 
 
-  public boolean checkPermission(String resourceType, String resourceId,
-                                 String permission, String requesterType, String requesterId) {
+  public boolean checkPermission(Resource resource, String resourceId,
+                                 Permission permission, Subject requesterType, String requesterId) {
     CheckPermissionRequest request = CheckPermissionRequest.newBuilder()
       .setResource(ObjectReference.newBuilder()
-        .setObjectType(resourceType)
+        .setObjectType(resource.name().toLowerCase())
         .setObjectId(resourceId)
         .build())
-      .setPermission(permission)
+      .setPermission(permission.name().toLowerCase())
       .setSubject(SubjectReference.newBuilder()
         .setObject(ObjectReference.newBuilder()
-          .setObjectType(requesterType)
+          .setObjectType(requesterType.name().toLowerCase())
           .setObjectId(requesterId)
           .build())
         .build())
@@ -121,20 +125,20 @@ public class AuthorizationService {
   }
 
   public boolean checkPermission(
-    String resourceType,
+    Resource resourceType,
     String resourceId,
-    String permission,
-    String requesterType,
+    Permission permission,
+    Subject requesterType,
     String requesterId,
     ConditionalPermissionRequest conditionalPermissionRequest
   ) {
 
     Struct.Builder contextBuilder = Struct.newBuilder();
 
-    if (StringUtils.isNotBlank(conditionalPermissionRequest.getPlatformId())) {
+    if (StringUtils.isNotBlank(conditionalPermissionRequest.getPassword())) {
       contextBuilder.putFields(
         CAVEAT_SUPPLIED_KEY,
-        Value.newBuilder().setStringValue(conditionalPermissionRequest.getPlatformId()).build()
+        Value.newBuilder().setStringValue(conditionalPermissionRequest.getPassword()).build()
       );
     }
 
@@ -142,15 +146,15 @@ public class AuthorizationService {
       CheckPermissionRequest.newBuilder()
         .setResource(
           ObjectReference.newBuilder()
-            .setObjectType(resourceType)
+            .setObjectType(resourceType.name().toLowerCase())
             .setObjectId(resourceId)
             .build())
-        .setPermission(permission)
+        .setPermission(permission.name().toLowerCase())
         .setSubject(
           SubjectReference.newBuilder()
             .setObject(
               ObjectReference.newBuilder()
-                .setObjectType(requesterType)
+                .setObjectType(requesterType.name().toLowerCase())
                 .setObjectId(requesterId)
                 .build())
             .build())
@@ -164,12 +168,12 @@ public class AuthorizationService {
   }
 
 
-  public void deleteRelationship(String resourceType, String resourceId) {
+  public void deleteRelationship(Resource resource, String resourceId) {
     DeleteRelationshipsRequest request =
       DeleteRelationshipsRequest.newBuilder()
         .setRelationshipFilter(
           RelationshipFilter.newBuilder()
-            .setResourceType(resourceType)
+            .setResourceType(resource.name().toLowerCase())
             .setOptionalResourceId(resourceId)
             .build()
         )
@@ -178,15 +182,15 @@ public class AuthorizationService {
     permissionsClient.deleteRelationships(request);
   }
 
-  public void deleteRelationship(String resourceType, String resourceId, String relation,
-                                 String subjectType, String subjectId) {
+  public void deleteRelationship(Resource resource, String resourceId, Relation relation,
+                                 Subject subject, String subjectId) {
     DeleteRelationshipsRequest request = DeleteRelationshipsRequest.newBuilder()
       .setRelationshipFilter(RelationshipFilter.newBuilder()
-        .setResourceType(resourceType)
+        .setResourceType(resource.name().toLowerCase())
         .setOptionalResourceId(resourceId)
-        .setOptionalRelation(relation)
+        .setOptionalRelation(relation.name().toLowerCase())
         .setOptionalSubjectFilter(SubjectFilter.newBuilder()
-          .setSubjectType(subjectType)
+          .setSubjectType(subject.name().toLowerCase())
           .setOptionalSubjectId(subjectId)
           .build())
         .build())
@@ -196,13 +200,13 @@ public class AuthorizationService {
   }
 
 
-  public List<RelationshipInfo> getOutgoingRelations(String resourceType, String resourceId,
-                                                     String relation) {
+  public List<RelationshipInfo> getOutgoingRelations(Resource resource, String resourceId,
+                                                     Relation relation) {
     ReadRelationshipsRequest request = ReadRelationshipsRequest.newBuilder()
       .setRelationshipFilter(RelationshipFilter.newBuilder()
-        .setResourceType(resourceType)
+        .setResourceType(resource.name().toLowerCase())
         .setOptionalResourceId(resourceId)
-        .setOptionalRelation(relation)
+        .setOptionalRelation(relation.name().toLowerCase())
         .build())
       .build();
 
@@ -214,10 +218,10 @@ public class AuthorizationService {
       Relationship rel = response.getRelationship();
 
       relations.add(RelationshipInfo.builder()
-        .resourceType(rel.getResource().getObjectType())
+        .resource(Resource.valueOf(rel.getResource().getObjectType().toUpperCase()))
         .resourceId(rel.getResource().getObjectId())
-        .relation(rel.getRelation())
-        .toResourceType(rel.getSubject().getObject().getObjectType())
+        .relation(Relation.valueOf(rel.getRelation().toUpperCase()))
+        .toResource(Resource.valueOf(rel.getSubject().getObject().getObjectType().toUpperCase()))
         .toResourceId(rel.getSubject().getObject().getObjectId())
         .build());
     }
@@ -229,13 +233,13 @@ public class AuthorizationService {
    * Get all relationships where this resource is the target (has relations pointing IN)
    * Example: cohort:xyz has parent -> schema:abc (schema is the target)
    */
-  public List<RelationshipInfo> getIncomingRelations(String resourceType, String resourceId,
-                                                     String relationName) {
+  public List<RelationshipInfo> getIncomingRelations(Resource resource, String resourceId,
+                                                     Relation relation) {
     ReadRelationshipsRequest request = ReadRelationshipsRequest.newBuilder()
       .setRelationshipFilter(RelationshipFilter.newBuilder()
-        .setOptionalRelation(relationName)
+        .setOptionalRelation(relation.name().toLowerCase())
         .setOptionalSubjectFilter(SubjectFilter.newBuilder()
-          .setSubjectType(resourceType)
+          .setSubjectType(resource.name().toLowerCase())
           .setOptionalSubjectId(resourceId)
           .build())
         .build())
@@ -249,10 +253,10 @@ public class AuthorizationService {
       Relationship rel = response.getRelationship();
 
       relations.add(RelationshipInfo.builder()
-        .resourceType(rel.getResource().getObjectType())
+        .resource(Resource.valueOf(rel.getResource().getObjectType().toUpperCase()))
         .resourceId(rel.getResource().getObjectId())
-        .relation(rel.getRelation())
-        .toResourceType(rel.getSubject().getObject().getObjectType())
+        .relation(Relation.valueOf(rel.getRelation().toUpperCase()))
+        .toResource(Resource.valueOf(rel.getSubject().getObject().getObjectType().toUpperCase()))
         .toResourceId(rel.getSubject().getObject().getObjectId())
         .build());
     }
@@ -265,24 +269,24 @@ public class AuthorizationService {
    * Write relationship with sub-relation (for group membership)
    * This is what sets userset_relation = "member"
    */
-  public void writeRelationshipWithSubRelation(String resourceType, String resourceId,
-                                               String relation, String subjectType,
-                                               String subjectId, String subRelation) {
+  public void writeRelationshipWithSubRelation(Resource resource, String resourceId,
+                                               Relation relation, Subject subject,
+                                               String subjectId, Relation subRelation) {
     WriteRelationshipsRequest request = WriteRelationshipsRequest.newBuilder()
       .addUpdates(RelationshipUpdate.newBuilder()
         .setOperation(RelationshipUpdate.Operation.OPERATION_TOUCH)
         .setRelationship(Relationship.newBuilder()
           .setResource(ObjectReference.newBuilder()
-            .setObjectType(resourceType)
+            .setObjectType(resource.name().toLowerCase())
             .setObjectId(resourceId)
             .build())
-          .setRelation(relation)
+          .setRelation(relation.name().toLowerCase())
           .setSubject(SubjectReference.newBuilder()
             .setObject(ObjectReference.newBuilder()
-              .setObjectType(subjectType)
+              .setObjectType(subject.name().toLowerCase())
               .setObjectId(subjectId)
               .build())
-            .setOptionalRelation(subRelation)  // ← This sets userset_relation!
+            .setOptionalRelation(subRelation.name().toLowerCase()) // ← This sets userset_relation!
             .build())
           .build())
         .build())
@@ -294,16 +298,16 @@ public class AuthorizationService {
   /**
    * Delete relationship with sub-relation
    */
-  public void deleteRelationshipWithSubRelation(String resourceType, String resourceId,
-                                                String relation, String subjectType,
+  public void deleteRelationshipWithSubRelation(Resource resource, String resourceId,
+                                                Relation relation, Subject subject,
                                                 String subjectId, String subRelation) {
     DeleteRelationshipsRequest request = DeleteRelationshipsRequest.newBuilder()
       .setRelationshipFilter(RelationshipFilter.newBuilder()
-        .setResourceType(resourceType)
+        .setResourceType(resource.name().toLowerCase())
         .setOptionalResourceId(resourceId)
-        .setOptionalRelation(relation)
+        .setOptionalRelation(relation.name().toLowerCase())
         .setOptionalSubjectFilter(SubjectFilter.newBuilder()
-          .setSubjectType(subjectType)
+          .setSubjectType(subject.name().toLowerCase())
           .setOptionalSubjectId(subjectId)
           .build())
         .build())

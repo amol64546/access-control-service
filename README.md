@@ -135,7 +135,7 @@ Content-Type: application/json
 
 {
   "resourceId": "resource-123",
-  "resourceType": "SCHEMA",
+  "resource": "SCHEMA",
   "ownerId": "user-1",
   "parentResourceId": "dataverse-456"
 }

@@ -1,5 +1,7 @@
 package com.acl.project.dto;
 
+import com.acl.project.enums.Relation;
+import com.acl.project.enums.Resource;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
@@ -13,14 +15,12 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class AccessRequest {
-  private String ownerSubjectId;
+public class PermissionRequest {
 
-  private String targetSubjectId;
-
-  private String resourceType;
+  private String userId;
+  private Resource resource;
   private String resourceId;
-  private String relation; // "owner", "editor", "viewer"
+  private Relation relation;
 
   private ConditionalPermissionRequest conditionalPermission;
 

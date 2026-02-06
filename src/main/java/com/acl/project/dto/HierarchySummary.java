@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class HierarchySummary {
+
   private Integer totalRelations;
   private Integer directParents;
   private Integer directChildren;

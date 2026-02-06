@@ -1,5 +1,7 @@
 package com.acl.project.dto;
 
+import com.acl.project.enums.Permission;
+import com.acl.project.enums.Resource;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
@@ -17,12 +19,9 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 @Builder
 public class PermissionCheckRequest {
 
-  private String requesterId;
-
-  private String resourceType;
+  private Resource resource;
   private String resourceId;
-
-  private String permission;
+  private Permission permission;
 
   private ConditionalPermissionRequest conditionalPermission;
 

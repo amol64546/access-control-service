@@ -4,8 +4,8 @@ import com.acl.project.dto.HierarchyRelation;
 import com.acl.project.dto.HierarchyResponse;
 import com.acl.project.dto.HierarchySummary;
 import com.acl.project.dto.RelationshipInfo;
+import com.acl.project.enums.*;
 import com.acl.project.exception.ApiException;
-import com.acl.project.exception.ErrorObject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -16,7 +16,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static com.acl.project.utils.constants.*;
+import static com.acl.project.utils.constants.ROOT_RESOURCE;
 
 @Service
 @RequiredArgsConstructor
@@ -25,32 +25,30 @@ public class HierarchyService {
 
   private final AuthorizationService authorizationService;
 
-  public HierarchyResponse getCompleteHierarchy(String resourceType,
+  public HierarchyResponse getCompleteHierarchy(Resource resource,
                                                 String resourceId,
                                                 String requesterId) {
-    log.info("Getting complete hierarchy for {}:{}", resourceType, resourceId);
+    log.info("Getting complete hierarchy for {}:{}", resource, resourceId);
 
-    if (!authorizationService.checkPermission(resourceType, resourceId,
-      READ, TENANT, requesterId)) {
-      throw new ApiException(ErrorObject.builder()
-        .httpStatus(HttpStatus.FORBIDDEN)
-        .errorMessage("Subject does not have view permission.")
-        .build());
+    if (!authorizationService.checkPermission(resource, resourceId,
+      Permission.READ, Subject.TENANT, requesterId)) {
+      throw new ApiException(HttpStatus.FORBIDDEN,
+        "Subject does not have view permission.");
     }
 
     List<HierarchyRelation> allRelations = new ArrayList<>();
 
     // Get all parent relationships (going up the tree)
-    allRelations.addAll(getAllParents(resourceType, resourceId));
+    allRelations.addAll(getAllParents(resource, resourceId));
 
     // Get all child relationships (going down the tree)
-    allRelations.addAll(getAllChildren(resourceType, resourceId, requesterId));
+    allRelations.addAll(getAllChildren(resource, resourceId, requesterId));
 
     // Calculate summary
     HierarchySummary summary = calculateSummary(allRelations);
 
     return HierarchyResponse.builder()
-      .resourceType(resourceType)
+      .resource(resource)
       .resourceId(resourceId)
       .relations(allRelations)
       .summary(summary)
@@ -60,18 +58,18 @@ public class HierarchyService {
   /**
    * Get all parents recursively
    */
-  private List<HierarchyRelation> getAllParents(String resourceType, String resourceId) {
+  private List<HierarchyRelation> getAllParents(Resource resource, String resourceId) {
     List<HierarchyRelation> parents = new ArrayList<>();
     Set<String> visited = new HashSet<>();
 
-    traverseParents(resourceType, resourceId, 1, parents, visited);
+    traverseParents(resource, resourceId, 1, parents, visited);
 
     return parents;
   }
 
-  private void traverseParents(String resourceType, String resourceId,
+  private void traverseParents(Resource resource, String resourceId,
                                int level, List<HierarchyRelation> parents, Set<String> visited) {
-    String key = resourceType + ":" + resourceId;
+    String key = resource + ":" + resourceId;
     if (visited.contains(key)) {
       return; // Prevent infinite loops
     }
@@ -79,24 +77,24 @@ public class HierarchyService {
 
     // Get all outgoing relations for this resource
     List<RelationshipInfo> outgoingRelations = new ArrayList<>();
-    if (!resourceType.equals(ROOT_RESOURCE)) {
+    if (!resource.equals(ROOT_RESOURCE)) {
       outgoingRelations =
-        authorizationService.getOutgoingRelations(resourceType, resourceId, PARENT);
+        authorizationService.getOutgoingRelations(resource, resourceId, Relation.PARENT);
     }
 
     for (RelationshipInfo rel : outgoingRelations) {
-      String relationType = (level == 1) ? DIRECT : INDIRECT;
+      AccessType accessType = (level == 1) ? AccessType.DIRECT : AccessType.INDIRECT;
 
       parents.add(HierarchyRelation.builder()
-        .relationType(relationType)
-        .resourceType(rel.getToResourceType())
+        .accessType(accessType)
+        .resource(rel.getToResource())
         .resourceId(rel.getToResourceId())
         .level(level)
-        .relation(PARENT)
+        .relation(Relation.PARENT)
         .build());
 
       // Recursively traverse up
-      traverseParents(rel.getToResourceType(), rel.getToResourceId(),
+      traverseParents(rel.getToResource(), rel.getToResourceId(),
         level + 1, parents, visited);
     }
   }
@@ -104,18 +102,18 @@ public class HierarchyService {
   /**
    * Get all children recursively
    */
-  private List<HierarchyRelation> getAllChildren(String resourceType, String resourceId, String requesterId) {
+  private List<HierarchyRelation> getAllChildren(Resource resource, String resourceId, String requesterId) {
     List<HierarchyRelation> children = new ArrayList<>();
     Set<String> visited = new HashSet<>();
 
-    traverseChildren(resourceType, resourceId, requesterId, 1, children, visited);
+    traverseChildren(resource, resourceId, requesterId, 1, children, visited);
 
     return children;
   }
 
-  private void traverseChildren(String resourceType, String resourceId, String userId,
+  private void traverseChildren(Resource resource, String resourceId, String userId,
                                 int level, List<HierarchyRelation> children, Set<String> visited) {
-    String key = resourceType + ":" + resourceId;
+    String key = resource + ":" + resourceId;
     if (visited.contains(key)) {
       return;
     }
@@ -123,27 +121,27 @@ public class HierarchyService {
 
     // Get all resources of this type that have this resource as parent
     List<RelationshipInfo> incomingRelations =
-      authorizationService.getIncomingRelations(resourceType, resourceId, PARENT);
+      authorizationService.getIncomingRelations(resource, resourceId, Relation.PARENT);
 
     for (RelationshipInfo rel : incomingRelations) {
       // Check if user has permission to view this child
-      if (!authorizationService.checkPermission(rel.getResourceType(), rel.getResourceId(),
-        READ, TENANT, userId)) {
+      if (!authorizationService.checkPermission(rel.getResource(), rel.getResourceId(),
+        Permission.READ, Subject.TENANT, userId)) {
         continue;
       }
 
-      String relationType = (level == 1) ? DIRECT : INDIRECT;
+      AccessType accessType = (level == 1) ? AccessType.DIRECT : AccessType.INDIRECT;
 
       children.add(HierarchyRelation.builder()
-        .relationType(relationType)
-        .resourceType(rel.getResourceType())
+        .accessType(accessType)
+        .resource(rel.getResource())
         .resourceId(rel.getResourceId())
         .level(level)
-        .relation(CHILD)
+        .relation(Relation.CHILD)
         .build());
 
       // Recursively traverse down
-      traverseChildren(rel.getResourceType(), rel.getResourceId(), userId,
+      traverseChildren(rel.getResource(), rel.getResourceId(), userId,
         level + 1, children, visited);
     }
   }
@@ -153,29 +151,33 @@ public class HierarchyService {
    */
   private HierarchySummary calculateSummary(List<HierarchyRelation> relations) {
     long directParents = relations.stream()
-      .filter(r -> PARENT.equals(r.getRelation()) && DIRECT.equals(r.getRelationType()))
+      .filter(r -> Relation.PARENT.equals(r.getRelation())
+        && AccessType.DIRECT.equals(r.getAccessType()))
       .count();
 
     long directChildren = relations.stream()
-      .filter(r -> CHILD.equals(r.getRelation()) && DIRECT.equals(r.getRelationType()))
+      .filter(r -> Relation.CHILD.equals(r.getRelation())
+        && AccessType.DIRECT.equals(r.getAccessType()))
       .count();
 
     long indirectParents = relations.stream()
-      .filter(r -> PARENT.equals(r.getRelation()) && INDIRECT.equals(r.getRelationType()))
+      .filter(r -> Relation.PARENT.equals(r.getRelation())
+        && AccessType.INDIRECT.equals(r.getAccessType()))
       .count();
 
     long indirectChildren = relations.stream()
-      .filter(r -> CHILD.equals(r.getRelation()) && INDIRECT.equals(r.getRelationType()))
+      .filter(r -> Relation.CHILD.equals(r.getRelation())
+        && AccessType.INDIRECT.equals(r.getAccessType()))
       .count();
 
     int maxParentLevel = relations.stream()
-      .filter(r -> r.getRelation().contains(PARENT))
+      .filter(r -> r.getRelation().equals(Relation.PARENT))
       .mapToInt(HierarchyRelation::getLevel)
       .max()
       .orElse(0);
 
     int maxChildLevel = relations.stream()
-      .filter(r -> r.getRelation().contains(CHILD))
+      .filter(r -> r.getRelation().equals(Relation.CHILD))
       .mapToInt(HierarchyRelation::getLevel)
       .max()
       .orElse(0);

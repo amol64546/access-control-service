@@ -1,5 +1,6 @@
 package com.acl.project.dto;
 
+import com.acl.project.enums.Resource;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,7 +12,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class HierarchyResponse {
-    private String resourceType;
+
+    private Resource resource;
     private String resourceId;
     private List<HierarchyRelation> relations;
     private HierarchySummary summary;

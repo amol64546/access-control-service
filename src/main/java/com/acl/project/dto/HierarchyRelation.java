@@ -1,5 +1,8 @@
 package com.acl.project.dto;
 
+import com.acl.project.enums.AccessType;
+import com.acl.project.enums.Relation;
+import com.acl.project.enums.Resource;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,9 +15,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class HierarchyRelation {
-  private String relationType; // "direct", "indirect"
-  private String resourceType;
+
+  private AccessType accessType;
+  private Resource resource;
   private String resourceId;
-  private Integer level; // 1 for direct, 2+ for indirect
-  private String relation; // "parent", "child"
+  private Integer level;
+  private Relation relation;
 }
