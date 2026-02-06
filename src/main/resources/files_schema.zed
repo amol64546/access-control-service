@@ -1,0 +1,53 @@
+caveat ip_prefix_match(ip string, supplied_ip string) {
+    supplied_ip.starts_with(ip)
+}
+
+definition user {}
+
+definition organisation {
+    relation owner: user
+    relation admin: user
+    relation member: user
+
+    permission manage_members = owner + admin
+    permission delete = owner
+    permission grant  = owner
+    permission revoke = owner
+}
+
+definition group {
+    relation parent: organisation
+    relation owner: user
+    relation admin: user
+    relation member: user
+
+    permission manage_members = owner + admin
+    permission delete = owner
+    permission read   = member + admin + owner
+}
+
+definition folder {
+    relation parent: folder | organisation
+    relation owner: user
+    relation editor: user | user with ip_prefix_match | group#member | group#member with ip_prefix_match
+    relation viewer: user | user with ip_prefix_match | group#member | group#member with ip_prefix_match
+
+    permission delete = owner
+    permission write  = owner + editor + parent->write
+    permission read   = viewer + write + parent->read
+    permission grant  = owner
+    permission revoke = owner
+}
+
+definition file {
+    relation parent: folder
+    relation owner: user
+    relation editor: user | user with ip_prefix_match | group#member | group#member with ip_prefix_match
+    relation viewer: user | user with ip_prefix_match | group#member | group#member with ip_prefix_match
+
+    permission delete = owner
+    permission write  = owner + editor + parent->write
+    permission read   = viewer + write + parent->read
+    permission grant  = owner
+    permission revoke = owner
+}

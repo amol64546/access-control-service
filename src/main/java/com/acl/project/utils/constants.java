@@ -2,7 +2,7 @@ package com.acl.project.utils;
 
 public class constants {
 
-  public static final String ROOT_RESOURCE = "dataverse";
+  public static final String ROOT_RESOURCE = "organisation";
   public static final String SPICEDB_SCHEMA_FILE_NAME = "construct_schema.zed";
   public static final String DIRECT = "direct";
   public static final String INDIRECT = "indirect";
@@ -15,13 +15,11 @@ public class constants {
   public static final String READ = "read";
   public static final String OWNER = "owner";
   public static final String ADMIN = "admin";
-  public static final String GROUP_TYPE = "group";
+  public static final String GROUP = "group";
   public static final String MEMBER = "member";
   public static final String MANAGE_MEMBERS = "manage_members";
-  public static final String DELETE_GROUP = "delete_group";
-  public static final String APP_ID = "appId";
-  public static final String PLATFORM_ID = "platformId";
-  public static final String CAVEAT_NAME = "platform_app_match";
-  public static final String SUPPLIED_PLATFORM_ID = "supplied_platformId";
-  public static final String SUPPLIED_APP_ID = "supplied_appId";
+
+  public static final String CAVEAT_NAME = "ip_prefix_match";
+  public static final String CAVEAT_ALLOWED_KEY = "ip";
+  public static final String CAVEAT_SUPPLIED_KEY = "supplied_ip";
 }

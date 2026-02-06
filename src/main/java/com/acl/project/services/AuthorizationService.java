@@ -60,10 +60,7 @@ public class AuthorizationService {
     // Build caveat context (Struct)
     Struct.Builder contextBuilder = Struct.newBuilder();
     if (StringUtils.isNotBlank(conditionalPermissionRequest.getPlatformId())) {
-      contextBuilder.putFields(PLATFORM_ID, Value.newBuilder().setStringValue(conditionalPermissionRequest.getPlatformId()).build());
-    }
-    if (StringUtils.isNotBlank(conditionalPermissionRequest.getAppId())) {
-      contextBuilder.putFields(APP_ID, Value.newBuilder().setStringValue(conditionalPermissionRequest.getAppId()).build());
+      contextBuilder.putFields(CAVEAT_ALLOWED_KEY, Value.newBuilder().setStringValue(conditionalPermissionRequest.getPlatformId()).build());
     }
 
     Relationship relationship =
@@ -136,15 +133,8 @@ public class AuthorizationService {
 
     if (StringUtils.isNotBlank(conditionalPermissionRequest.getPlatformId())) {
       contextBuilder.putFields(
-        SUPPLIED_PLATFORM_ID,
+        CAVEAT_SUPPLIED_KEY,
         Value.newBuilder().setStringValue(conditionalPermissionRequest.getPlatformId()).build()
-      );
-    }
-
-    if (StringUtils.isNotBlank(conditionalPermissionRequest.getAppId())) {
-      contextBuilder.putFields(
-        SUPPLIED_APP_ID,
-        Value.newBuilder().setStringValue(conditionalPermissionRequest.getAppId()).build()
       );
     }
 

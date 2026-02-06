@@ -22,7 +22,7 @@ public class GroupService {
   public void createGroup(String groupId, String ownerId) {
     // Set the creator as owner
     authorizationService.writeRelationship(
-      GROUP_TYPE, groupId,
+      GROUP, groupId,
       OWNER, TENANT, ownerId
     );
     log.info("Created group {} with owner {}", groupId, ownerId);
@@ -33,7 +33,7 @@ public class GroupService {
    */
   public void addGroupAdmin(String groupId, String adminId, String requesterId) {
     // Check if requester is owner
-    if (!authorizationService.checkPermission(GROUP_TYPE, groupId, DELETE_GROUP, TENANT, requesterId)) {
+    if (!authorizationService.checkPermission(GROUP, groupId, DELETE, TENANT, requesterId)) {
       throw new ApiException(ErrorObject.builder()
         .httpStatus(HttpStatus.FORBIDDEN)
         .errorMessage("Only group owner can add admins")
@@ -41,7 +41,7 @@ public class GroupService {
     }
 
     authorizationService.writeRelationship(
-      GROUP_TYPE, groupId,
+      GROUP, groupId,
       ADMIN, TENANT, adminId
     );
     log.info("Added admin {} to group {} by {}", adminId, groupId, requesterId);
@@ -52,7 +52,7 @@ public class GroupService {
    */
   public void addGroupMember(String groupId, String memberId, String requesterId) {
     // Check if requester has manage_members permission
-    if (!authorizationService.checkPermission(GROUP_TYPE, groupId, MANAGE_MEMBERS, TENANT, requesterId)) {
+    if (!authorizationService.checkPermission(GROUP, groupId, MANAGE_MEMBERS, TENANT, requesterId)) {
       throw new ApiException(ErrorObject.builder()
         .httpStatus(HttpStatus.FORBIDDEN)
         .errorMessage("Only group owner or admin can add members")
@@ -60,7 +60,7 @@ public class GroupService {
     }
 
     authorizationService.writeRelationship(
-      GROUP_TYPE, groupId,
+      GROUP, groupId,
       MEMBER, TENANT, memberId
     );
     log.info("Added member {} to group {} by {}", memberId, groupId, requesterId);
@@ -71,7 +71,7 @@ public class GroupService {
    */
   public void removeGroupMember(String groupId, String memberId, String requesterId) {
     // Check if requester has manage_members permission
-    if (!authorizationService.checkPermission(GROUP_TYPE, groupId, MANAGE_MEMBERS, TENANT, requesterId)) {
+    if (!authorizationService.checkPermission(GROUP, groupId, MANAGE_MEMBERS, TENANT, requesterId)) {
       throw new ApiException(ErrorObject.builder()
         .httpStatus(HttpStatus.FORBIDDEN)
         .errorMessage("Only group owner or admin can remove members")
@@ -79,7 +79,7 @@ public class GroupService {
     }
 
     // Prevent removing owner
-    if (authorizationService.checkPermission(GROUP_TYPE, groupId, DELETE_GROUP, TENANT, memberId)) {
+    if (authorizationService.checkPermission(GROUP, groupId, DELETE, TENANT, memberId)) {
       throw new ApiException(ErrorObject.builder()
         .httpStatus(HttpStatus.BAD_REQUEST)
         .errorMessage("Cannot remove group owner")
@@ -87,7 +87,7 @@ public class GroupService {
     }
 
     authorizationService.deleteRelationship(
-      GROUP_TYPE, groupId,
+      GROUP, groupId,
       MEMBER, TENANT, memberId
     );
     log.info("Removed member {} from group {} by {}", memberId, groupId, requesterId);
@@ -98,7 +98,7 @@ public class GroupService {
    */
   public void removeGroupAdmin(String groupId, String adminId, String requesterId) {
     // Check if requester is owner
-    if (!authorizationService.checkPermission(GROUP_TYPE, groupId, DELETE_GROUP, TENANT, requesterId)) {
+    if (!authorizationService.checkPermission(GROUP, groupId, DELETE, TENANT, requesterId)) {
       throw new ApiException(ErrorObject.builder()
         .httpStatus(HttpStatus.FORBIDDEN)
         .errorMessage("Only group owner can remove admins")
@@ -106,7 +106,7 @@ public class GroupService {
     }
 
     authorizationService.deleteRelationship(
-      GROUP_TYPE, groupId,
+      GROUP, groupId,
       ADMIN, TENANT, adminId
     );
     log.info("Removed admin {} from group {} by {}", adminId, groupId, requesterId);
@@ -118,7 +118,7 @@ public class GroupService {
   public void grantGroupAccess(String resourceType, String resourceId,
                                String groupId, String relation, String requesterId) {
     // Check if requester has manage_members permission on the group
-    if (!authorizationService.checkPermission(GROUP_TYPE, groupId, MANAGE_MEMBERS, TENANT, requesterId)) {
+    if (!authorizationService.checkPermission(GROUP, groupId, MANAGE_MEMBERS, TENANT, requesterId)) {
       throw new ApiException(ErrorObject.builder()
         .httpStatus(HttpStatus.FORBIDDEN)
         .errorMessage("Only group owner or admin can grant group access")
@@ -135,7 +135,7 @@ public class GroupService {
 
     authorizationService.writeRelationshipWithSubRelation(
       resourceType, resourceId,
-      relation, GROUP_TYPE, groupId, MEMBER
+      relation, GROUP, groupId, MEMBER
     );
     log.info("Granted {} access to {}:{} for group {} by {}",
       relation, resourceType, resourceId, groupId, requesterId);
@@ -147,7 +147,7 @@ public class GroupService {
   public void revokeGroupAccess(String resourceType, String resourceId,
                                 String groupId, String relation, String requesterId) {
     // Check if requester has manage_members permission on the group
-    if (!authorizationService.checkPermission(GROUP_TYPE, groupId, MANAGE_MEMBERS, TENANT, requesterId)) {
+    if (!authorizationService.checkPermission(GROUP, groupId, MANAGE_MEMBERS, TENANT, requesterId)) {
       throw new ApiException(ErrorObject.builder()
         .httpStatus(HttpStatus.FORBIDDEN)
         .errorMessage("Only group owner or admin can revoke group access")
@@ -164,7 +164,7 @@ public class GroupService {
 
     authorizationService.deleteRelationshipWithSubRelation(
       resourceType, resourceId,
-      relation, GROUP_TYPE, groupId, MEMBER
+      relation, GROUP, groupId, MEMBER
     );
     log.info("Revoked {} access from {}:{} for group {} by {}",
       relation, resourceType, resourceId, groupId, requesterId);
@@ -175,7 +175,7 @@ public class GroupService {
    */
   public void deleteGroup(String groupId, String requesterId) {
     // Check if requester is owner
-    if (!authorizationService.checkPermission(GROUP_TYPE, groupId, DELETE_GROUP, TENANT, requesterId)) {
+    if (!authorizationService.checkPermission(GROUP, groupId, DELETE, TENANT, requesterId)) {
       throw new ApiException(ErrorObject.builder()
         .httpStatus(HttpStatus.FORBIDDEN)
         .errorMessage("Only group owner can delete the group")
@@ -183,7 +183,7 @@ public class GroupService {
     }
 
     // Delete all relationships for this group
-    authorizationService.deleteRelationship(GROUP_TYPE, groupId);
+    authorizationService.deleteRelationship(GROUP, groupId);
     log.info("Deleted group {} by {}", groupId, requesterId);
   }
 
@@ -192,7 +192,7 @@ public class GroupService {
    */
   public void transferOwnership(String groupId, String newOwnerId, String currentOwnerId) {
     // Check if requester is owner
-    if (!authorizationService.checkPermission(GROUP_TYPE, groupId, DELETE_GROUP, TENANT, currentOwnerId)) {
+    if (!authorizationService.checkPermission(GROUP, groupId, DELETE, TENANT, currentOwnerId)) {
       throw new ApiException(ErrorObject.builder()
         .httpStatus(HttpStatus.FORBIDDEN)
         .errorMessage("Only group owner can transfer ownership")
@@ -200,10 +200,10 @@ public class GroupService {
     }
 
     // Remove old owner
-    authorizationService.deleteRelationship(GROUP_TYPE, groupId, OWNER, TENANT, currentOwnerId);
+    authorizationService.deleteRelationship(GROUP, groupId, OWNER, TENANT, currentOwnerId);
 
     // Set new owner
-    authorizationService.writeRelationship(GROUP_TYPE, groupId, OWNER, TENANT, newOwnerId);
+    authorizationService.writeRelationship(GROUP, groupId, OWNER, TENANT, newOwnerId);
 
     log.info("Transferred ownership of group {} from {} to {}", groupId, currentOwnerId, newOwnerId);
   }
