@@ -15,5 +15,4 @@ public class PermissionOptions {
   private final Subject subject;
   private final String subjectId;
   private final String password;  // Optional: for caveat context
-  private final Integer daysFromNow;
 }

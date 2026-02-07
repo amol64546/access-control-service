@@ -28,20 +28,29 @@ public class AuthorizationService {
   private final PermissionsServiceGrpc.PermissionsServiceBlockingStub permissionsClient;
 
   public void writeRelationship(RelationshipOptions options) {
-    Relationship.Builder relationshipBuilder = Relationship.newBuilder()
-      .setResource(ObjectReference.newBuilder()
-        .setObjectType(options.getResource().name().toLowerCase())
-        .setObjectId(options.getResourceId())
-        .build())
-      .setRelation(options.getRelation().name().toLowerCase())
-      .setSubject(SubjectReference.newBuilder()
+    SubjectReference.Builder subjectBuilder =
+      SubjectReference.newBuilder()
         .setObject(ObjectReference.newBuilder()
           .setObjectType(options.getSubject().name().toLowerCase())
           .setObjectId(options.getSubjectId())
+          .build());
+
+    // Optional sub relation, sets userset_relation
+    if (options.getSubRelation() != null) {
+      subjectBuilder.setOptionalRelation(
+        options.getSubRelation().name().toLowerCase()
+      );
+    }
+
+    Relationship.Builder relationshipBuilder =
+      Relationship.newBuilder()
+        .setResource(ObjectReference.newBuilder()
+          .setObjectType(options.getResource().name().toLowerCase())
+          .setObjectId(options.getResourceId())
           .build())
-        .setOptionalRelation(options.getSubRelation() != null ?
-          options.getSubRelation().name().toLowerCase() : "")
-        .build());
+        .setRelation(options.getRelation().name().toLowerCase())
+        .setSubject(subjectBuilder.build());
+
 
     // Add caveat if password is provided
     if (options.getPassword() != null) {
@@ -58,11 +67,7 @@ public class AuthorizationService {
 
     // Add expiration if provided
     if (options.getDaysFromNow() != null) {
-      Instant expirationTime = Instant.now().plus(options.getDaysFromNow(), ChronoUnit.DAYS);
-      Timestamp expiration = Timestamp.newBuilder()
-        .setSeconds(expirationTime.getEpochSecond())
-        .setNanos(expirationTime.getNano())
-        .build();
+      Timestamp expiration = getTimestamp(options);
       relationshipBuilder.setOptionalExpiresAt(expiration);
     }
 
@@ -106,39 +111,6 @@ public class AuthorizationService {
     return response.getPermissionship() ==
       CheckPermissionResponse.Permissionship.PERMISSIONSHIP_HAS_PERMISSION;
   }
-
-
-  public void deleteRelationship(Resource resource, String resourceId) {
-    DeleteRelationshipsRequest request =
-      DeleteRelationshipsRequest.newBuilder()
-        .setRelationshipFilter(
-          RelationshipFilter.newBuilder()
-            .setResourceType(resource.name().toLowerCase())
-            .setOptionalResourceId(resourceId)
-            .build()
-        )
-        .build();
-
-    permissionsClient.deleteRelationships(request);
-  }
-
-  public void deleteRelationship(Resource resource, String resourceId, Relation relation,
-                                 Subject subject, String subjectId) {
-    DeleteRelationshipsRequest request = DeleteRelationshipsRequest.newBuilder()
-      .setRelationshipFilter(RelationshipFilter.newBuilder()
-        .setResourceType(resource.name().toLowerCase())
-        .setOptionalResourceId(resourceId)
-        .setOptionalRelation(relation.name().toLowerCase())
-        .setOptionalSubjectFilter(SubjectFilter.newBuilder()
-          .setSubjectType(subject.name().toLowerCase())
-          .setOptionalSubjectId(subjectId)
-          .build())
-        .build())
-      .build();
-
-    permissionsClient.deleteRelationships(request);
-  }
-
 
   public List<RelationshipInfo> getOutgoingRelations(Resource resource, String resourceId,
                                                      Relation relation) {
@@ -204,43 +176,22 @@ public class AuthorizationService {
     return relations;
   }
 
+  public void deleteRelationship(Resource resource, String resourceId) {
+    DeleteRelationshipsRequest request =
+      DeleteRelationshipsRequest.newBuilder()
+        .setRelationshipFilter(
+          RelationshipFilter.newBuilder()
+            .setResourceType(resource.name().toLowerCase())
+            .setOptionalResourceId(resourceId)
+            .build()
+        )
+        .build();
 
-  /**
-   * Write relationship with sub-relation (for group membership)
-   * This is what sets userset_relation = "member"
-   */
-  public void writeRelationshipWithSubRelation(Resource resource, String resourceId,
-                                               Relation relation, Subject subject,
-                                               String subjectId, Relation subRelation) {
-    WriteRelationshipsRequest request = WriteRelationshipsRequest.newBuilder()
-      .addUpdates(RelationshipUpdate.newBuilder()
-        .setOperation(RelationshipUpdate.Operation.OPERATION_TOUCH)
-        .setRelationship(Relationship.newBuilder()
-          .setResource(ObjectReference.newBuilder()
-            .setObjectType(resource.name().toLowerCase())
-            .setObjectId(resourceId)
-            .build())
-          .setRelation(relation.name().toLowerCase())
-          .setSubject(SubjectReference.newBuilder()
-            .setObject(ObjectReference.newBuilder()
-              .setObjectType(subject.name().toLowerCase())
-              .setObjectId(subjectId)
-              .build())
-            .setOptionalRelation(subRelation.name().toLowerCase()) // ← This sets userset_relation!
-            .build())
-          .build())
-        .build())
-      .build();
-
-    permissionsClient.writeRelationships(request);
+    permissionsClient.deleteRelationships(request);
   }
 
-  /**
-   * Delete relationship with sub-relation
-   */
-  public void deleteRelationshipWithSubRelation(Resource resource, String resourceId,
-                                                Relation relation, Subject subject,
-                                                String subjectId, String subRelation) {
+  public void deleteRelationship(Resource resource, String resourceId, Relation relation,
+                                 Subject subject, String subjectId) {
     DeleteRelationshipsRequest request = DeleteRelationshipsRequest.newBuilder()
       .setRelationshipFilter(RelationshipFilter.newBuilder()
         .setResourceType(resource.name().toLowerCase())
@@ -254,6 +205,15 @@ public class AuthorizationService {
       .build();
 
     permissionsClient.deleteRelationships(request);
+  }
+
+
+  private static Timestamp getTimestamp(RelationshipOptions options) {
+    Instant expirationTime = Instant.now().plus(options.getDaysFromNow(), ChronoUnit.DAYS);
+    return Timestamp.newBuilder()
+      .setSeconds(expirationTime.getEpochSecond())
+      .setNanos(expirationTime.getNano())
+      .build();
   }
 
 }

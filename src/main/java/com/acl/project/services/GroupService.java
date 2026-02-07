@@ -174,11 +174,12 @@ public class GroupService {
       throw new ApiException(HttpStatus.FORBIDDEN,
         "You don't have permission to grant access to this resource");
     }
-
-    authorizationService.writeRelationshipWithSubRelation(
-      request.getResource(), request.getResourceId(),
-      request.getRelation(), Subject.GROUP, groupId, Relation.MEMBER
+    authorizationService.writeRelationship(RelationshipOptions.builder()
+        .resource(request.getResource()).resourceId(request.getResourceId())
+        .subject(Subject.GROUP).subjectId(groupId)
+        .relation(Relation.MEMBER).build()
     );
+
     log.info("Granted {} access to {}:{} for group {} by {}",
       request.getRelation(), request.getResource(), request.getResourceId(),
       groupId, tenantId);
@@ -209,9 +210,9 @@ public class GroupService {
         "You don't have permission to revoke access from this resource");
     }
 
-    authorizationService.deleteRelationshipWithSubRelation(
+    authorizationService.deleteRelationship(
       request.getResource(), request.getResourceId(),
-      request.getRelation(), Subject.GROUP, groupId, MEMBER
+      request.getRelation(), Subject.GROUP, groupId
     );
     log.info("Revoked {} access from {}:{} for group {} by {}",
       request.getRelation(), request.getResource(), request.getResourceId(),
