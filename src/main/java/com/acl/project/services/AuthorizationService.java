@@ -68,10 +68,10 @@ public class AuthorizationService {
     }
 
     // Add expiration if provided
-//    if (options.getDaysFromNow() != null) {
-//      Timestamp expiration = getTimestamp(options);
-//      relationshipBuilder.setOptionalExpiresAt(expiration);
-//    }
+    if (options.getDaysFromNow() != null) {
+      Timestamp expiration = getTimestamp(options);
+      relationshipBuilder.setOptionalExpiresAt(expiration);
+    }
 
     WriteRelationshipsRequest request = WriteRelationshipsRequest.newBuilder()
       .addUpdates(RelationshipUpdate.newBuilder()
@@ -210,12 +210,40 @@ public class AuthorizationService {
   }
 
 
-//  private static Timestamp getTimestamp(RelationshipOptions options) {
-//    Instant expirationTime = Instant.now().plus(options.getDaysFromNow(), ChronoUnit.DAYS);
-//    return Timestamp.newBuilder()
-//      .setSeconds(expirationTime.getEpochSecond())
-//      .setNanos(expirationTime.getNano())
-//      .build();
-//  }
+  public List<String> expandPermissionTree(
+    Resource resource,
+    String resourceId,
+    Relation relation
+  ) {
+    LookupSubjectsRequest request =
+      LookupSubjectsRequest.newBuilder()
+        .setResource(ObjectReference.newBuilder()
+          .setObjectType(resource.name().toLowerCase())
+          .setObjectId(resourceId)
+          .build())
+        .setPermission(relation.name().toLowerCase())
+        .setSubjectObjectType(Subject.TENANT.name().toLowerCase())
+        .build();
+
+    Iterator<LookupSubjectsResponse> responses =
+      permissionsClient.lookupSubjects(request);
+
+    List<String> memberList = new ArrayList<>();
+    while (responses.hasNext()) {
+      LookupSubjectsResponse resp = responses.next();
+      memberList.add(resp.getSubject().getSubjectObjectId());
+    }
+
+    return memberList;
+  }
+
+
+  private static Timestamp getTimestamp(RelationshipOptions options) {
+    Instant expirationTime = Instant.now().plus(options.getDaysFromNow(), ChronoUnit.DAYS);
+    return Timestamp.newBuilder()
+      .setSeconds(expirationTime.getEpochSecond())
+      .setNanos(expirationTime.getNano())
+      .build();
+  }
 
 }

@@ -16,6 +16,6 @@ public class RelationshipOptions {
   private final String subjectId;
   private final Relation subRelation;    // Optional: for group membership
   private final String password;         // Optional: for caveat
-//  private final Integer daysFromNow;  // Optional: for expiration
+  private final Integer daysFromNow;  // Optional: for expiration
 
 }

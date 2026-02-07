@@ -14,6 +14,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 import static com.acl.project.utils.constants.TENANT_ID;
 
 @Slf4j
@@ -126,7 +128,7 @@ public class GroupService {
     authorizationService.writeRelationship(RelationshipOptions.builder()
       .resource(request.getResource()).resourceId(request.getResourceId())
       .subject(Subject.GROUP).subjectId(groupId).subRelation(Relation.MEMBER)
-      .password(request.getPassword())
+      .password(request.getPassword()).daysFromNow(request.getDaysFromNow())
       .relation(request.getRelation()).build()
     );
 
@@ -191,8 +193,31 @@ public class GroupService {
     log.info("Deleted group {} by {}", groupId, tenantId);
   }
 
-  public Object getAllMembers(String groupId, HttpServletRequest httpServletRequest) {
+  public List<String> getAllMembers(String groupId, HttpServletRequest httpServletRequest) {
     String tenantId = httpServletRequest.getHeader(TENANT_ID);
-    return null;
+
+    // Security gate: only owner can list members (adjust if needed)
+    if (!authorizationService.checkPermission(
+      PermissionOptions.builder()
+        .resource(Resource.GROUP)
+        .resourceId(groupId)
+        .subject(Subject.TENANT)
+        .subjectId(tenantId)
+        .permission(Permission.READ)
+        .build())) {
+
+      throw new ApiException(HttpStatus.FORBIDDEN,
+        "Only group owner can view members");
+    }
+
+    // Expand group#member
+
+    return authorizationService.expandPermissionTree(
+      Resource.GROUP,
+      groupId,
+      Relation.MEMBER
+    );
   }
+
+
 }

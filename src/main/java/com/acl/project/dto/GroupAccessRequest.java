@@ -18,4 +18,5 @@ public class GroupAccessRequest {
     private String resourceId;
     private Relation relation;
     private String password;
+    private Integer daysFromNow;
 }

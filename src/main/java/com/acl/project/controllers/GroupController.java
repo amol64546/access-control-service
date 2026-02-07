@@ -9,6 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/groups")
 @RequiredArgsConstructor
@@ -40,10 +42,10 @@ public class GroupController {
       .build());
   }
 
-  @GetMapping("/{groupId}/memgers")
-  public ResponseEntity<?> getAllMembers(
+  @GetMapping("/{groupId}/members")
+  public ResponseEntity<List<String>> getAllMembers(
     @PathVariable String groupId,
-    HttpServletRequest httpServletRequest){
+    HttpServletRequest httpServletRequest) {
     return ResponseEntity.ok(groupService.getAllMembers(groupId, httpServletRequest));
   }
 

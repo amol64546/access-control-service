@@ -97,7 +97,7 @@ public class ResourceService {
         .subject(Subject.TENANT)
         .subjectId(request.getUserId())
         .password(request.getPassword())
-//        .daysFromNow(request.getDaysFromNow())
+        .daysFromNow(request.getDaysFromNow())
         .build()
     );
 

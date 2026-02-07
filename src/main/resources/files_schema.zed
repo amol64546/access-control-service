@@ -1,3 +1,5 @@
+use expiration
+
 caveat password_match(password string, supplied_password string) {
     supplied_password == password
 }
@@ -17,8 +19,8 @@ definition group {
 definition folder {
     relation parent: folder
     relation owner: tenant
-    relation editor: tenant | tenant with password_match | group#member | group#member with password_match
-    relation viewer: tenant | tenant with password_match | group#member | group#member with password_match
+    relation editor: tenant | tenant with password_match | group#member | group#member with password_match | tenant with expiration | group#member with expiration
+    relation viewer: tenant | tenant with password_match | group#member | group#member with password_match | tenant with expiration | group#member with expiration
 
     permission delete = owner
     permission write  = owner + editor + parent->write
@@ -30,8 +32,8 @@ definition folder {
 definition file {
     relation parent: folder
     relation owner: tenant
-    relation editor: tenant | tenant with password_match | group#member | group#member with password_match
-    relation viewer: tenant | tenant with password_match | group#member | group#member with password_match
+    relation editor: tenant | tenant with password_match | group#member | group#member with password_match | tenant with expiration | group#member with expiration
+    relation viewer: tenant | tenant with password_match | group#member | group#member with password_match | tenant with expiration | group#member with expiration
 
     permission delete = owner
     permission write  = owner + editor + parent->write
