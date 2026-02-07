@@ -201,6 +201,41 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "get all members",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "tenantId",
+								"value": "f1412d85-7545-4d50-b437-7b6d193f8f5e",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"daysFromNow\": 10,\n    // \"password\" : \"123\",\n    \"userId\": \"bdfb69a7-aea4-43d8-9b79-9fc72db9c970\",\n    \"resource\": \"FILE\",\n    \"resourceId\": \"b32f8db8-0fb6-449f-80ac-a182ede0ab15\",\n    \"relation\": \"VIEWER\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/groups/group123/members",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"groups",
+								"group123",
+								"members"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -255,7 +290,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    // \"daysFromNow\": 10,\n    // \"password\" : \"123\",\n    \"userId\": \"bdfb69a7-aea4-43d8-9b79-9fc72db9c970\",\n    \"resource\": \"FILE\",\n    \"resourceId\": \"f02996cd-013b-411c-aaa2-b0cb16997072\",\n    \"relation\": \"VIEWER\"\n}",
+							"raw": "{\n    \"daysFromNow\": 10,\n    // \"password\" : \"123\",\n    \"userId\": \"bdfb69a7-aea4-43d8-9b79-9fc72db9c970\",\n    \"resource\": \"FILE\",\n    \"resourceId\": \"b32f8db8-0fb6-449f-80ac-a182ede0ab15\",\n    \"relation\": \"VIEWER\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
