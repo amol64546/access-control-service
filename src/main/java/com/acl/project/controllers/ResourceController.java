@@ -26,15 +26,19 @@ public class ResourceController {
     log.info("Create Request: {}", createResource);
     resourceService.createResource(createResource, httpServletRequest);
     return ResponseEntity.ok(ApiResponse.builder()
+      .msg("Resource created successfully")
       .requestBody(createResource).build());
   }
 
   @GetMapping
-  public ResponseEntity<Boolean> checkPermission(
+  public ResponseEntity<ApiResponse> checkPermission(
     @RequestBody PermissionCheckRequest permissionCheckRequest,
     HttpServletRequest httpServletRequest) {
     log.info("Permission Check Request: {}", permissionCheckRequest);
-    return ResponseEntity.ok(resourceService.checkPermission(permissionCheckRequest, httpServletRequest));
+    boolean allowed = resourceService.checkPermission(permissionCheckRequest, httpServletRequest);
+    return ResponseEntity.ok(ApiResponse.builder()
+      .msg(allowed ? "Permission granted" : "Permission denied")
+      .allowed(allowed).build());
   }
 
   @DeleteMapping
@@ -46,7 +50,7 @@ public class ResourceController {
     resourceService.deleteResource(resource, resourceId, httpServletRequest);
     return ResponseEntity.ok(ApiResponse.builder()
       .msg("Delete the resource")
-      .resourceId(resourceId).requestBody(resource)
+      .resourceId(resourceId).resource(resource)
       .build());
 
   }

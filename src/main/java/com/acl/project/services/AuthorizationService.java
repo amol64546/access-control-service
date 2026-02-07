@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import static com.acl.project.utils.constants.*;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -55,21 +57,21 @@ public class AuthorizationService {
     // Add caveat if password is provided
     if (options.getPassword() != null) {
       Struct.Builder contextBuilder = Struct.newBuilder();
-      contextBuilder.putFields("caveat_key",
+      contextBuilder.putFields(CAVEAT_KEY,
         Value.newBuilder().setStringValue(options.getPassword()).build());
 
       relationshipBuilder.setOptionalCaveat(
         ContextualizedCaveat.newBuilder()
-          .setCaveatName("caveat_name")
+          .setCaveatName(CAVEAT_NAME)
           .setContext(contextBuilder.build())
           .build());
     }
 
     // Add expiration if provided
-    if (options.getDaysFromNow() != null) {
-      Timestamp expiration = getTimestamp(options);
-      relationshipBuilder.setOptionalExpiresAt(expiration);
-    }
+//    if (options.getDaysFromNow() != null) {
+//      Timestamp expiration = getTimestamp(options);
+//      relationshipBuilder.setOptionalExpiresAt(expiration);
+//    }
 
     WriteRelationshipsRequest request = WriteRelationshipsRequest.newBuilder()
       .addUpdates(RelationshipUpdate.newBuilder()
@@ -102,7 +104,7 @@ public class AuthorizationService {
     // Add context if password is provided
     if (options.getPassword() != null) {
       Struct.Builder contextBuilder = Struct.newBuilder();
-      contextBuilder.putFields("caveat_supplied_key",
+      contextBuilder.putFields(CAVEAT_SUPPLIED_KEY,
         Value.newBuilder().setStringValue(options.getPassword()).build());
       requestBuilder.setContext(contextBuilder.build());
     }
@@ -208,12 +210,12 @@ public class AuthorizationService {
   }
 
 
-  private static Timestamp getTimestamp(RelationshipOptions options) {
-    Instant expirationTime = Instant.now().plus(options.getDaysFromNow(), ChronoUnit.DAYS);
-    return Timestamp.newBuilder()
-      .setSeconds(expirationTime.getEpochSecond())
-      .setNanos(expirationTime.getNano())
-      .build();
-  }
+//  private static Timestamp getTimestamp(RelationshipOptions options) {
+//    Instant expirationTime = Instant.now().plus(options.getDaysFromNow(), ChronoUnit.DAYS);
+//    return Timestamp.newBuilder()
+//      .setSeconds(expirationTime.getEpochSecond())
+//      .setNanos(expirationTime.getNano())
+//      .build();
+//  }
 
 }

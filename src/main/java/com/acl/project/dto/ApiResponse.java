@@ -1,5 +1,6 @@
 package com.acl.project.dto;
 
+import com.acl.project.enums.Resource;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
@@ -20,8 +21,10 @@ public class ApiResponse {
   private String msg;
   private String groupId;
   private String adminId;
+  private Resource resource;
   private String resourceId;
   private Object requestBody;
+  private Boolean allowed;
 
   @Override
   public String toString() {

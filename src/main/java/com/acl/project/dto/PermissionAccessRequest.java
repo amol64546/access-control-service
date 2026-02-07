@@ -21,7 +21,8 @@ public class PermissionAccessRequest {
   private Resource resource;
   private String resourceId;
   private Relation relation;
-  private Integer daysFromNow;
+//  private Integer daysFromNow;
+  private String password;
 
 
   @Override

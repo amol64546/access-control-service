@@ -17,4 +17,5 @@ public class GroupAccessRequest {
     private Resource resource;
     private String resourceId;
     private Relation relation;
+    private String password;
 }

@@ -83,7 +83,7 @@ public class HierarchyService {
 
     // Get all outgoing relations for this resource
     List<RelationshipInfo> outgoingRelations = new ArrayList<>();
-    if (!resource.equals(ROOT_RESOURCE)) {
+    if (!resource.name().equalsIgnoreCase(ROOT_RESOURCE)) {
       outgoingRelations =
         authorizationService.getOutgoingRelations(resource, resourceId, Relation.PARENT);
     }

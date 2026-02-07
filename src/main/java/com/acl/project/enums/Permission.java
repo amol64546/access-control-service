@@ -1,11 +1,17 @@
 package com.acl.project.enums;
 
+import io.swagger.v3.oas.annotations.Hidden;
+
 public enum Permission {
 
- REVOKE,
- GRANT,
- DELETE,
  READ,
- MANAGE_MEMBERS,
+ WRITE,
+
+ @Hidden
+ DELETE,
+ @Hidden
+ GRANT,
+ @Hidden
+ REVOKE
 
 }

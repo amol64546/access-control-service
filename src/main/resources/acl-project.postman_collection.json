@@ -20,17 +20,8 @@
 								"type": "text"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"groupId\": \"engineers\",\n  \"groupName\": \"Engineering Team\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
 						"url": {
-							"raw": "http://localhost:8080/api/groups",
+							"raw": "http://localhost:8080/api/groups?groupId=group123",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -39,35 +30,12 @@
 							"path": [
 								"api",
 								"groups"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "add admin",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "tenantId",
-								"value": "f1412d85-7545-4d50-b437-7b6d193f8f5e",
-								"type": "text"
-							}
-						],
-						"url": {
-							"raw": "http://localhost:8080/api/groups/engineers/admins/adminId",
-							"protocol": "http",
-							"host": [
-								"localhost"
 							],
-							"port": "8080",
-							"path": [
-								"api",
-								"groups",
-								"engineers",
-								"admins",
-								"adminId"
+							"query": [
+								{
+									"key": "groupId",
+									"value": "group123"
+								}
 							]
 						}
 					},
@@ -85,7 +53,7 @@
 							}
 						],
 						"url": {
-							"raw": "http://localhost:8080/api/groups/engineers/members/memberId",
+							"raw": "http://localhost:8080/api/groups/group123/members/member123",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -94,9 +62,9 @@
 							"path": [
 								"api",
 								"groups",
-								"engineers",
+								"group123",
 								"members",
-								"memberId"
+								"member123"
 							]
 						}
 					},
@@ -115,7 +83,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"resourceType\": \"ORGANISATION\",\n  \"resourceId\": \"65b573a1-9dff-40e6-8792-87323bb41aff\",\n  \"relation\": \"WRITE\"\n}",
+							"raw": "{\n    \"resource\": \"FOLDER\",\n    \"resourceId\": \"5a07ec9c-314c-4d79-af96-5f36710967ba\",\n    \"relation\": \"EDITOR\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -123,7 +91,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8080/api/groups/engineers/access/grant",
+							"raw": "http://localhost:8080/api/groups/group123/access/grant",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -132,7 +100,7 @@
 							"path": [
 								"api",
 								"groups",
-								"engineers",
+								"group123",
 								"access",
 								"grant"
 							]
@@ -152,7 +120,7 @@
 							}
 						],
 						"url": {
-							"raw": "http://localhost:8080/api/groups/engineers",
+							"raw": "http://localhost:8080/api/groups/group123",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -161,36 +129,7 @@
 							"path": [
 								"api",
 								"groups",
-								"engineers"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "remove admin",
-					"request": {
-						"method": "DELETE",
-						"header": [
-							{
-								"key": "tenantId",
-								"value": "f1412d85-7545-4d50-b437-7b6d193f8f5e",
-								"type": "text"
-							}
-						],
-						"url": {
-							"raw": "http://localhost:8080/api/groups/{groupId}/admins/{adminId}",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"api",
-								"groups",
-								"{groupId}",
-								"admins",
-								"{adminId}"
+								"group123"
 							]
 						}
 					},
@@ -208,7 +147,7 @@
 							}
 						],
 						"url": {
-							"raw": "http://localhost:8080/api/groups/{groupId}/members/{memberId}",
+							"raw": "http://localhost:8080/api/groups/group123/members/member123",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -217,9 +156,9 @@
 							"path": [
 								"api",
 								"groups",
-								"{groupId}",
+								"group123",
 								"members",
-								"{memberId}"
+								"member123"
 							]
 						}
 					},
@@ -238,7 +177,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"resourceType\": \"ORGANISATION\",\n  \"resourceId\": \"65b573a1-9dff-40e6-8792-87323bb41aff\",\n  \"relation\": \"WRITE\"\n}",
+							"raw": "{\n  \"resourceType\": \"FOLDER\",\n  \"resourceId\": \"65b573a1-9dff-40e6-8792-87323bb41aff\",\n  \"relation\": \"EDITOR\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -246,7 +185,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8080/api/groups/engineers/access/revoke",
+							"raw": "http://localhost:8080/api/groups/group123/access/revoke",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -255,38 +194,9 @@
 							"path": [
 								"api",
 								"groups",
-								"engineers",
+								"group123",
 								"access",
 								"revoke"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Transfer group ownership",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "tenantId",
-								"value": "f1412d85-7545-4d50-b437-7b6d193f8f5e",
-								"type": "text"
-							}
-						],
-						"url": {
-							"raw": "http://localhost:8080/api/groups/{groupId}/transfer-ownership/65b573a1-9dff-40e6-8792-87323bb41aff",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"api",
-								"groups",
-								"{groupId}",
-								"transfer-ownership",
-								"65b573a1-9dff-40e6-8792-87323bb41aff"
 							]
 						}
 					},
@@ -310,7 +220,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    // \"parentResource\": \"ORGANISATION\",\n    // \"parentResourceId\": \"1762260a-aa75-4caa-ae65-a2fd3c0b15ec\",\n    \"resource\": \"FOLDER\",\n    \"resourceId\": \"{{$randomUUID}}\"\n}",
+							"raw": "{\n    // \"parentResource\": \"FOLDER\",\n    // \"parentResourceId\": \"1762260a-aa75-4caa-ae65-a2fd3c0b15ec\",\n    \"resource\": \"FILE\",\n    \"resourceId\": \"{{$randomUUID}}\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -345,7 +255,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"userId\": \"bdfb69a7-aea4-43d8-9b79-9fc72db9c970\",\n    \"resource\": \"ORGANISATION\",\n    \"resourceId\": \"54a2dde1-5bb8-4faa-9ffa-24795be0d31d\",\n    \"relation\": \"WRITE\"\n    // \"conditionalPermission\" : {\n    //     \"platformId\" : \"1\",\n    //     \"appId\" : \"1\"\n    // }\n}",
+							"raw": "{\n    // \"daysFromNow\": 10,\n    // \"password\" : \"123\",\n    \"userId\": \"bdfb69a7-aea4-43d8-9b79-9fc72db9c970\",\n    \"resource\": \"FILE\",\n    \"resourceId\": \"f02996cd-013b-411c-aaa2-b0cb16997072\",\n    \"relation\": \"VIEWER\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -378,13 +288,19 @@
 						"header": [
 							{
 								"key": "tenantId",
-								"value": "f1412d85-7545-4d50-b437-7b6d193f8f5e",
+								"value": "member123",
 								"type": "text"
+							},
+							{
+								"key": "password",
+								"value": "password",
+								"type": "text",
+								"disabled": true
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"resource\": \"ORGANISATION\",\n    \"resourceId\": \"54a2dde1-5bb8-4faa-9ffa-24795be0d31d\",\n    \"permission\": \"WRITE\"\n    // \"conditionalPermission\": {\n    //     \"password\": \"132424\"\n    // }\n}",
+							"raw": "{\n    \"resource\": \"FOLDER\",\n    \"resourceId\": \"5a07ec9c-314c-4d79-af96-5f36710967ba\",\n    \"permission\": \"WRITE\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -418,7 +334,7 @@
 							}
 						],
 						"url": {
-							"raw": "http://localhost:8080/api/resources/hierarchy?resource=ORGANISATION&resourceId=d12ca7c0-3896-4b3a-ae67-59d37875fed8",
+							"raw": "http://localhost:8080/api/resources/hierarchy?resource=FOLDER&resourceId=d12ca7c0-3896-4b3a-ae67-59d37875fed8",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -432,7 +348,7 @@
 							"query": [
 								{
 									"key": "resource",
-									"value": "ORGANISATION"
+									"value": "FOLDER"
 								},
 								{
 									"key": "resourceId",
@@ -456,7 +372,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"userId\": \"bdfb69a7-aea4-43d8-9b79-9fc72db9c970\",\n    \"resource\": \"ORGANISATION\",\n    \"resourceId\": \"54a2dde1-5bb8-4faa-9ffa-24795be0d31d\",\n    \"relation\": \"WRITE\"\n}",
+							"raw": "{\n    \"userId\": \"bdfb69a7-aea4-43d8-9b79-9fc72db9c970\",\n    \"resource\": \"FOLDER\",\n    \"resourceId\": \"801987de-89dd-4972-9c01-81a8aa83923b\",\n    \"relation\": \"EDITOR\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -490,17 +406,8 @@
 								"type": "text"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"resource\": \"ORGANISATION\",\n    \"resourceId\": \"7d1ef594-5e5a-4899-aeff-cbf91fc182ef\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
 						"url": {
-							"raw": "http://localhost:8080/api/resources",
+							"raw": "http://localhost:8080/api/resources?resource=FOLDER&resourceId=801987de-89dd-4972-9c01-81a8aa83923b",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -509,6 +416,16 @@
 							"path": [
 								"api",
 								"resources"
+							],
+							"query": [
+								{
+									"key": "resource",
+									"value": "FOLDER"
+								},
+								{
+									"key": "resourceId",
+									"value": "801987de-89dd-4972-9c01-81a8aa83923b"
+								}
 							]
 						}
 					},

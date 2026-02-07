@@ -4,30 +4,18 @@ caveat password_match(password string, supplied_password string) {
 
 definition tenant {}
 
-definition organisation {
-    relation owner: tenant
-    relation admin: tenant
-    relation member: tenant
-
-    permission manage_members = owner + admin
-    permission delete = owner
-    permission grant  = owner
-    permission revoke = owner
-}
-
 definition group {
-    relation parent: organisation
     relation owner: tenant
-    relation admin: tenant
     relation member: tenant
 
-    permission manage_members = owner + admin
+    permission read   = owner
+    permission write = owner
     permission delete = owner
-    permission read   = member + admin + owner
 }
+
 
 definition folder {
-    relation parent: folder | organisation
+    relation parent: folder
     relation owner: tenant
     relation editor: tenant | tenant with password_match | group#member | group#member with password_match
     relation viewer: tenant | tenant with password_match | group#member | group#member with password_match

@@ -77,15 +77,13 @@ public class ResourceService {
   public void deleteResource(Resource resource, String resourceId, HttpServletRequest httpServletRequest) {
     String tenantId = httpServletRequest.getHeader(TENANT_ID);
 
-    validatePermission(tenantId, resourceId,
-      resource, Permission.DELETE);
+    validatePermission(tenantId, resourceId, resource, Permission.DELETE);
     authorizationService.deleteRelationship(
       resource, resourceId);
   }
 
   public void grantPermission(PermissionAccessRequest request, HttpServletRequest httpServletRequest) {
     String tenantId = httpServletRequest.getHeader(TENANT_ID);
-    String password = httpServletRequest.getHeader(PASSWORD);
 
     validateRelation(request.getRelation());
     validatePermission(tenantId, request.getResourceId(),
@@ -98,8 +96,8 @@ public class ResourceService {
         .relation(request.getRelation())
         .subject(Subject.TENANT)
         .subjectId(request.getUserId())
-        .password(password)
-        .daysFromNow(request.getDaysFromNow())
+        .password(request.getPassword())
+//        .daysFromNow(request.getDaysFromNow())
         .build()
     );
 
@@ -111,6 +109,7 @@ public class ResourceService {
     validateRelation(request.getRelation());
     validatePermission(tenantId, request.getResourceId(),
       request.getResource(), Permission.REVOKE);
+
     authorizationService.deleteRelationship(
       request.getResource(), request.getResourceId(),
       request.getRelation(), Subject.TENANT, request.getUserId());

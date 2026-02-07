@@ -1,5 +1,10 @@
 package com.acl.project.enums;
 
+import io.swagger.v3.oas.annotations.Hidden;
+
 public enum AccessType {
-  DIRECT, INDIRECT
+  @Hidden
+  DIRECT,
+  @Hidden
+  INDIRECT
 }

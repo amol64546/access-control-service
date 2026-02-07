@@ -28,30 +28,6 @@ public class GroupController {
       .build());
   }
 
-  @PostMapping("/{groupId}/admins/{adminId}")
-  public ResponseEntity<ApiResponse> addAdmin(
-    @PathVariable String groupId,
-    @PathVariable String adminId,
-    HttpServletRequest httpServletRequest) {
-    groupService.addGroupAdmin(groupId, adminId, httpServletRequest);
-    return ResponseEntity.ok(ApiResponse.builder()
-      .msg("Admin added successfully")
-      .groupId(groupId).adminId(adminId)
-      .build());
-  }
-
-  @DeleteMapping("/{groupId}/admins/{adminId}")
-  public ResponseEntity<ApiResponse> removeAdmin(
-    @PathVariable String groupId,
-    @PathVariable String adminId,
-    HttpServletRequest httpServletRequest) {
-    groupService.removeGroupAdmin(groupId, adminId, httpServletRequest);
-    return ResponseEntity.ok(ApiResponse.builder()
-      .msg("Admin removed successfully")
-      .groupId(groupId).adminId(adminId)
-      .build());
-  }
-
   @PostMapping("/{groupId}/members/{memberId}")
   public ResponseEntity<ApiResponse> addMember(
     @PathVariable String groupId,
@@ -62,6 +38,13 @@ public class GroupController {
       .msg("Member added successfully")
       .groupId(groupId).adminId(memberId)
       .build());
+  }
+
+  @GetMapping("/{groupId}/memgers")
+  public ResponseEntity<?> getAllMembers(
+    @PathVariable String groupId,
+    HttpServletRequest httpServletRequest){
+    return ResponseEntity.ok(groupService.getAllMembers(groupId, httpServletRequest));
   }
 
   @DeleteMapping("/{groupId}/members/{memberId}")
@@ -111,15 +94,5 @@ public class GroupController {
       .build());
   }
 
-  @PutMapping("/{groupId}/transfer-ownership/{adminId}")
-  public ResponseEntity<ApiResponse> transferOwnership(
-    @PathVariable String groupId,
-    @PathVariable String adminId,
-    HttpServletRequest httpServletRequest) {
-    groupService.transferOwnership(groupId, adminId, httpServletRequest);
-    return ResponseEntity.ok(ApiResponse.builder()
-      .msg("Ownership transferred successfully")
-      .groupId(groupId).adminId(adminId)
-      .build());
-  }
+
 }
