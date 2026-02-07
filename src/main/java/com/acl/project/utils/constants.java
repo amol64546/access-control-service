@@ -3,6 +3,8 @@ package com.acl.project.utils;
 public class constants {
 
   public static final String TENANT = "tenant";
+  public static final String TENANT_ID = "tenantId";
+  public static final String PASSWORD = "password";
   public static final String MEMBER = "member";
   public static final String ROOT_RESOURCE = "organisation";
   public static final String SPICEDB_SCHEMA_FILE_NAME = "files_schema.zed";

@@ -8,6 +8,7 @@ import com.acl.project.enums.Relation;
 import com.acl.project.enums.Resource;
 import com.acl.project.enums.Subject;
 import com.acl.project.exception.ApiException;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
@@ -16,7 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import static com.acl.project.utils.constants.TENANT;
+import static com.acl.project.utils.constants.*;
 
 @Slf4j
 @Service
@@ -25,7 +26,10 @@ public class ResourceService {
 
   private final AuthorizationService authorizationService;
 
-  public Object createResource(CreateResource request, String tenantId) {
+  public void createResource(CreateResource request, HttpServletRequest httpServletRequest) {
+
+    String tenantId = httpServletRequest.getHeader(TENANT_ID);
+
     authorizationService.writeRelationship(
       request.getResource(), request.getResourceId(),
       Relation.OWNER, TENANT, tenantId
@@ -50,11 +54,13 @@ public class ResourceService {
         request.getParentResourceId()
       );
     }
-    return request;
   }
 
-  public boolean checkPermission(PermissionCheckRequest request, String tenantId) {
-    if (ObjectUtils.isEmpty(request.getConditionalPermission())) {
+  public boolean checkPermission(PermissionCheckRequest request, HttpServletRequest httpServletRequest) {
+    String tenantId = httpServletRequest.getHeader(TENANT_ID);
+    String password = httpServletRequest.getHeader(PASSWORD);
+
+    if (StringUtils.isBlank(password)) {
       return authorizationService.checkPermission(
         request.getResource(), request.getResourceId(),
         request.getPermission(), Subject.TENANT, tenantId
@@ -63,24 +69,28 @@ public class ResourceService {
       return authorizationService.checkPermission(
         request.getResource(), request.getResourceId(),
         request.getPermission(), Subject.TENANT, tenantId,
-        request.getConditionalPermission()
+        password
       );
     }
   }
 
-  public ResponseEntity<String> deleteResource(Resource resource, String resourceId, String tenantId) {
+  public void deleteResource(Resource resource, String resourceId, HttpServletRequest httpServletRequest) {
+    String tenantId = httpServletRequest.getHeader(TENANT_ID);
+
     validatePermission(tenantId, resourceId,
       resource, Permission.DELETE);
     authorizationService.deleteRelationship(
       resource, resourceId);
-    return ResponseEntity.ok("Delete the resource.");
   }
 
-  public ResponseEntity<String> grantPermission(PermissionRequest request, String tenantId) {
+  public void grantPermission(PermissionRequest request, HttpServletRequest httpServletRequest) {
+    String tenantId = httpServletRequest.getHeader(TENANT_ID);
+    String password = httpServletRequest.getHeader(PASSWORD);
+
     validateRelation(request.getRelation());
     validatePermission(tenantId, request.getResourceId(),
       request.getResource(), Permission.GRANT);
-    if (ObjectUtils.isEmpty(request.getConditionalPermission())) {
+    if (StringUtils.isBlank(password)) {
       authorizationService.writeRelationship(
         request.getResource(), request.getResourceId(),
         request.getRelation(), TENANT, request.getUserId());
@@ -88,20 +98,20 @@ public class ResourceService {
       authorizationService.writeRelationship(
         request.getResource(), request.getResourceId(),
         request.getRelation(), Subject.TENANT, request.getUserId(),
-        request.getConditionalPermission());
+        password);
     }
 
-    return ResponseEntity.ok("Permission granted successfully.");
   }
 
-  public ResponseEntity<String> revokePermission(PermissionRequest request, String tenantId) {
+  public void revokePermission(PermissionRequest request, HttpServletRequest httpServletRequest) {
+    String tenantId = httpServletRequest.getHeader(TENANT_ID);
+
     validateRelation(request.getRelation());
     validatePermission(tenantId, request.getResourceId(),
       request.getResource(), Permission.REVOKE);
     authorizationService.deleteRelationship(
       request.getResource(), request.getResourceId(),
       request.getRelation(), Subject.TENANT, request.getUserId());
-    return ResponseEntity.ok("Permission granted successfully.");
   }
 
   private void validateRelation(Relation relation) {

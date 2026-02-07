@@ -22,8 +22,6 @@ public class PermissionRequest {
   private String resourceId;
   private Relation relation;
 
-  private ConditionalPermissionRequest conditionalPermission;
-
   @Override
   public String toString() {
     return ToStringBuilder.reflectionToString(this, ToStringStyle.JSON_STYLE);

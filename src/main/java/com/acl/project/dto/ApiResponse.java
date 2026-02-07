@@ -1,7 +1,5 @@
 package com.acl.project.dto;
 
-import com.acl.project.enums.Permission;
-import com.acl.project.enums.Resource;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
@@ -17,14 +15,17 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Builder
-public class PermissionCheckRequest {
+public class ApiResponse {
 
-  private Resource resource;
+  private String msg;
+  private String groupId;
+  private String adminId;
   private String resourceId;
-  private Permission permission;
+  private Object requestBody;
 
   @Override
   public String toString() {
     return ToStringBuilder.reflectionToString(this, ToStringStyle.JSON_STYLE);
   }
+
 }

@@ -1,8 +1,9 @@
 package com.acl.project.controllers;
 
-import com.acl.project.dto.CreateGroupRequest;
+import com.acl.project.dto.ApiResponse;
 import com.acl.project.dto.GroupAccessRequest;
 import com.acl.project.services.GroupService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -17,90 +18,108 @@ public class GroupController {
   private final GroupService groupService;
 
   @PostMapping
-  public ResponseEntity<?> createGroup(
-    @RequestBody CreateGroupRequest request,
-    @RequestHeader String tenantId) {
-    log.info("Create Group Request: {}", request);
-    groupService.createGroup(request.getGroupId(), tenantId);
-    return ResponseEntity.ok("Group created successfully");
+  public ResponseEntity<ApiResponse> createGroup(
+    @RequestParam String groupId,
+    HttpServletRequest httpServletRequest) {
+    groupService.createGroup(groupId, httpServletRequest);
+    return ResponseEntity.ok(ApiResponse.builder()
+      .msg("Group created successfully")
+      .groupId(groupId)
+      .build());
   }
 
   @PostMapping("/{groupId}/admins/{adminId}")
-  public ResponseEntity<?> addAdmin(
+  public ResponseEntity<ApiResponse> addAdmin(
     @PathVariable String groupId,
     @PathVariable String adminId,
-    @RequestHeader String tenantId) {
-    log.info("Add admin to group {}: {} by {}", groupId, adminId, tenantId);
-    groupService.addGroupAdmin(groupId, adminId, tenantId);
-    return ResponseEntity.ok("Admin added successfully");
+    HttpServletRequest httpServletRequest) {
+    groupService.addGroupAdmin(groupId, adminId, httpServletRequest);
+    return ResponseEntity.ok(ApiResponse.builder()
+      .msg("Admin added successfully")
+      .groupId(groupId).adminId(adminId)
+      .build());
   }
 
   @DeleteMapping("/{groupId}/admins/{adminId}")
-  public ResponseEntity<?> removeAdmin(
+  public ResponseEntity<ApiResponse> removeAdmin(
     @PathVariable String groupId,
     @PathVariable String adminId,
-    @RequestHeader String tenantId) {
-    log.info("Remove admin {} from group {} by {}", adminId, groupId, tenantId);
-    groupService.removeGroupAdmin(groupId, adminId, tenantId);
-    return ResponseEntity.ok("Admin removed successfully");
+    HttpServletRequest httpServletRequest) {
+    groupService.removeGroupAdmin(groupId, adminId, httpServletRequest);
+    return ResponseEntity.ok(ApiResponse.builder()
+      .msg("Admin removed successfully")
+      .groupId(groupId).adminId(adminId)
+      .build());
   }
 
   @PostMapping("/{groupId}/members/{memberId}")
-  public ResponseEntity<?> addMember(
+  public ResponseEntity<ApiResponse> addMember(
     @PathVariable String groupId,
     @PathVariable String memberId,
-    @RequestHeader String tenantId) {
-    log.info("Add member to group {}: {} by {}", groupId, memberId, tenantId);
-    groupService.addGroupMember(groupId, memberId, tenantId);
-    return ResponseEntity.ok("Member added successfully");
+    HttpServletRequest httpServletRequest) {
+    groupService.addGroupMember(groupId, memberId, httpServletRequest);
+    return ResponseEntity.ok(ApiResponse.builder()
+      .msg("Member added successfully")
+      .groupId(groupId).adminId(memberId)
+      .build());
   }
 
   @DeleteMapping("/{groupId}/members/{memberId}")
-  public ResponseEntity<?> removeMember(
+  public ResponseEntity<ApiResponse> removeMember(
     @PathVariable String groupId,
     @PathVariable String memberId,
-    @RequestHeader String tenantId) {
-    log.info("Remove member {} from group {} by {}", memberId, groupId, tenantId);
-    groupService.removeGroupMember(groupId, memberId, tenantId);
-    return ResponseEntity.ok("Member removed successfully");
+    HttpServletRequest httpServletRequest) {
+    groupService.removeGroupMember(groupId, memberId, httpServletRequest);
+    return ResponseEntity.ok(ApiResponse.builder()
+      .msg("Member removed successfully")
+      .groupId(groupId).adminId(memberId)
+      .build());
   }
 
   @PostMapping("/{groupId}/access/grant")
-  public ResponseEntity<?> grantGroupAccess(
+  public ResponseEntity<ApiResponse> grantGroupAccess(
     @PathVariable String groupId,
     @RequestBody GroupAccessRequest request,
-    @RequestHeader String tenantId) {
-    log.info("Grant group access: {}", request);
-    groupService.grantGroupAccess(groupId, request, tenantId);
-    return ResponseEntity.ok("Group access granted successfully");
+    HttpServletRequest httpServletRequest) {
+    groupService.grantGroupAccess(groupId, request, httpServletRequest);
+    return ResponseEntity.ok(ApiResponse.builder()
+      .msg("Group access granted successfully")
+      .groupId(groupId).requestBody(request)
+      .build());
   }
 
   @DeleteMapping("/{groupId}/access/revoke")
-  public ResponseEntity<?> revokeGroupAccess(
+  public ResponseEntity<ApiResponse> revokeGroupAccess(
     @PathVariable String groupId,
     @RequestBody GroupAccessRequest request,
-    @RequestHeader String tenantId) {
-    log.info("Revoke group access: {}", request);
-    groupService.revokeGroupAccess(groupId, request, tenantId);
-    return ResponseEntity.ok("Group access revoked successfully");
+    HttpServletRequest httpServletRequest) {
+    groupService.revokeGroupAccess(groupId, request, httpServletRequest);
+    return ResponseEntity.ok(ApiResponse.builder()
+      .msg("Group access revoked successfully")
+      .groupId(groupId).requestBody(request)
+      .build());
   }
 
   @DeleteMapping("/{groupId}")
-  public ResponseEntity<?> deleteGroup(
+  public ResponseEntity<ApiResponse> deleteGroup(
     @PathVariable String groupId,
-    @RequestHeader String tenantId) {
-    log.info("Delete group {} by {}", groupId, tenantId);
-    groupService.deleteGroup(groupId, tenantId);
-    return ResponseEntity.ok("Group deleted successfully");
+    HttpServletRequest httpServletRequest) {
+    groupService.deleteGroup(groupId, httpServletRequest);
+    return ResponseEntity.ok(ApiResponse.builder()
+      .msg("Group deleted successfully")
+      .groupId(groupId)
+      .build());
   }
 
   @PutMapping("/{groupId}/transfer-ownership/{adminId}")
-  public ResponseEntity<?> transferOwnership(
+  public ResponseEntity<ApiResponse> transferOwnership(
     @PathVariable String groupId,
     @PathVariable String adminId,
-    @RequestHeader String tenantId) {
-    log.info("Transfer ownership of group {}: {}", groupId, adminId);
-    groupService.transferOwnership(groupId, adminId, tenantId);
-    return ResponseEntity.ok("Ownership transferred successfully");
+    HttpServletRequest httpServletRequest) {
+    groupService.transferOwnership(groupId, adminId, httpServletRequest);
+    return ResponseEntity.ok(ApiResponse.builder()
+      .msg("Ownership transferred successfully")
+      .groupId(groupId).adminId(adminId)
+      .build());
   }
 }

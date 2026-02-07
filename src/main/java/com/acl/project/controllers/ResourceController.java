@@ -1,12 +1,10 @@
 package com.acl.project.controllers;
 
-import com.acl.project.dto.CreateResource;
-import com.acl.project.dto.HierarchyResponse;
-import com.acl.project.dto.PermissionCheckRequest;
-import com.acl.project.dto.PermissionRequest;
+import com.acl.project.dto.*;
 import com.acl.project.enums.Resource;
 import com.acl.project.services.HierarchyService;
 import com.acl.project.services.ResourceService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -22,54 +20,69 @@ public class ResourceController {
   private final HierarchyService hierarchyService;
 
   @PostMapping
-  public ResponseEntity<?> create(
+  public ResponseEntity<ApiResponse> create(
     @RequestBody CreateResource createResource,
-    @RequestHeader String tenantId) {
+    HttpServletRequest httpServletRequest) {
     log.info("Create Request: {}", createResource);
-    return ResponseEntity.ok(resourceService.createResource(createResource, tenantId));
+    resourceService.createResource(createResource, httpServletRequest);
+    return ResponseEntity.ok(ApiResponse.builder()
+      .requestBody(createResource).build());
   }
 
   @GetMapping
   public ResponseEntity<Boolean> checkPermission(
     @RequestBody PermissionCheckRequest permissionCheckRequest,
-    @RequestHeader String tenantId) {
+    HttpServletRequest httpServletRequest) {
     log.info("Permission Check Request: {}", permissionCheckRequest);
-    return ResponseEntity.ok(resourceService.checkPermission(permissionCheckRequest, tenantId));
+    return ResponseEntity.ok(resourceService.checkPermission(permissionCheckRequest, httpServletRequest));
   }
 
   @DeleteMapping
-  public ResponseEntity<?> delete(
+  public ResponseEntity<ApiResponse> delete(
     @RequestParam Resource resource,
     @RequestParam String resourceId,
-    @RequestHeader String tenantId) {
+    HttpServletRequest httpServletRequest) {
     log.info("Delete Request: {}", resource);
-    return resourceService.deleteResource(resource, resourceId, tenantId);
+    resourceService.deleteResource(resource, resourceId, httpServletRequest);
+    return ResponseEntity.ok(ApiResponse.builder()
+      .msg("Delete the resource")
+      .resourceId(resourceId).requestBody(resource)
+      .build());
+
   }
 
   @PostMapping("/grant")
-  public ResponseEntity<?> grant(
+  public ResponseEntity<ApiResponse> grant(
     @RequestBody PermissionRequest permissionRequest,
-    @RequestHeader String tenantId) {
+    HttpServletRequest httpServletRequest) {
     log.info("Grant Request: {}", permissionRequest);
-    return resourceService.grantPermission(permissionRequest, tenantId);
+    resourceService.grantPermission(permissionRequest, httpServletRequest);
+    return ResponseEntity.ok(ApiResponse.builder()
+      .msg("Permission granted successfully")
+      .requestBody(permissionRequest)
+      .build());
   }
 
   @DeleteMapping("/revoke")
-  public ResponseEntity<?> Revoke(
+  public ResponseEntity<ApiResponse> Revoke(
     @RequestBody PermissionRequest permissionRequest,
-    @RequestHeader String tenantId) {
+    HttpServletRequest httpServletRequest) {
     log.info("Revoke Request: {}", permissionRequest);
-    return resourceService.revokePermission(permissionRequest, tenantId);
+    resourceService.revokePermission(permissionRequest, httpServletRequest);
+    return ResponseEntity.ok(ApiResponse.builder()
+      .msg("Permission revoked successfully")
+      .requestBody(permissionRequest)
+      .build());
   }
 
   @GetMapping("/hierarchy")
   public ResponseEntity<HierarchyResponse> getCompleteHierarchy(
     @RequestParam Resource resource,
     @RequestParam String resourceId,
-    @RequestHeader String tenantId) {
+    HttpServletRequest httpServletRequest) {
     log.info("Get complete hierarchy for {}:{}", resource, resourceId);
     return ResponseEntity.ok(
-      hierarchyService.getCompleteHierarchy(resource, resourceId, tenantId)
+      hierarchyService.getCompleteHierarchy(resource, resourceId, httpServletRequest)
     );
   }
 }

@@ -6,6 +6,7 @@ import com.acl.project.dto.HierarchySummary;
 import com.acl.project.dto.RelationshipInfo;
 import com.acl.project.enums.*;
 import com.acl.project.exception.ApiException;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Set;
 
 import static com.acl.project.utils.constants.ROOT_RESOURCE;
+import static com.acl.project.utils.constants.TENANT_ID;
 
 @Service
 @RequiredArgsConstructor
@@ -27,11 +29,12 @@ public class HierarchyService {
 
   public HierarchyResponse getCompleteHierarchy(Resource resource,
                                                 String resourceId,
-                                                String requesterId) {
+                                                HttpServletRequest httpServletRequest) {
     log.info("Getting complete hierarchy for {}:{}", resource, resourceId);
+    String tenantId = httpServletRequest.getHeader(TENANT_ID);
 
     if (!authorizationService.checkPermission(resource, resourceId,
-      Permission.READ, Subject.TENANT, requesterId)) {
+      Permission.READ, Subject.TENANT, tenantId)) {
       throw new ApiException(HttpStatus.FORBIDDEN,
         "Subject does not have view permission.");
     }
@@ -42,7 +45,7 @@ public class HierarchyService {
     allRelations.addAll(getAllParents(resource, resourceId));
 
     // Get all child relationships (going down the tree)
-    allRelations.addAll(getAllChildren(resource, resourceId, requesterId));
+    allRelations.addAll(getAllChildren(resource, resourceId, tenantId));
 
     // Calculate summary
     HierarchySummary summary = calculateSummary(allRelations);

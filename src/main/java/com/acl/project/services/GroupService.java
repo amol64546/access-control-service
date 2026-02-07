@@ -6,13 +6,13 @@ import com.acl.project.enums.Relation;
 import com.acl.project.enums.Resource;
 import com.acl.project.enums.Subject;
 import com.acl.project.exception.ApiException;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import static com.acl.project.utils.constants.MEMBER;
-import static com.acl.project.utils.constants.TENANT;
+import static com.acl.project.utils.constants.*;
 
 @Slf4j
 @Service
@@ -24,7 +24,9 @@ public class GroupService {
   /**
    * Create a new group
    */
-  public void createGroup(String groupId, String tenantId) {
+  public void createGroup(String groupId, HttpServletRequest httpServletRequest) {
+    String tenantId = httpServletRequest.getHeader(TENANT_ID);
+
     // Set the creator as owner
     authorizationService.writeRelationship(
       Resource.GROUP, groupId,
@@ -36,7 +38,10 @@ public class GroupService {
   /**
    * Add admin to a group (only owner can do this)
    */
-  public void addGroupAdmin(String groupId, String adminId, String tenantId) {
+  public void addGroupAdmin(String groupId, String adminId, HttpServletRequest httpServletRequest) {
+    log.info("Add admin to group {}: {} by {}", groupId, adminId, httpServletRequest);
+    String tenantId = httpServletRequest.getHeader(TENANT_ID);
+
     // Check if requester is owner
     if (!authorizationService.checkPermission(Resource.GROUP, groupId, Permission.DELETE,
       Subject.TENANT, tenantId)) {
@@ -55,7 +60,10 @@ public class GroupService {
   /**
    * Remove admin from a group (only owner can do this)
    */
-  public void removeGroupAdmin(String groupId, String adminId, String tenantId) {
+  public void removeGroupAdmin(String groupId, String adminId, HttpServletRequest httpServletRequest) {
+    log.info("Remove admin {} from group {} by {}", adminId, groupId, httpServletRequest);
+    String tenantId = httpServletRequest.getHeader(TENANT_ID);
+
     // Check if requester is owner
     if (!authorizationService.checkPermission(Resource.GROUP, groupId, Permission.DELETE,
       Subject.TENANT, tenantId)) {
@@ -74,7 +82,10 @@ public class GroupService {
   /**
    * Add a member to a group (only owner or admin can do this)
    */
-  public void addGroupMember(String groupId, String memberId, String tenantId) {
+  public void addGroupMember(String groupId, String memberId, HttpServletRequest httpServletRequest) {
+    log.info("Add member to group {}: {} by {}", groupId, memberId, httpServletRequest);
+    String tenantId = httpServletRequest.getHeader(TENANT_ID);
+
     // Check if requester has manage_members permission
     if (!authorizationService.checkPermission(Resource.GROUP, groupId, Permission.MANAGE_MEMBERS,
       Subject.TENANT, tenantId)) {
@@ -93,7 +104,10 @@ public class GroupService {
   /**
    * Remove a member from a group (only owner or admin can do this)
    */
-  public void removeGroupMember(String groupId, String memberId, String tenantId) {
+  public void removeGroupMember(String groupId, String memberId, HttpServletRequest httpServletRequest) {
+    log.info("Remove member {} from group {} by {}", memberId, groupId, httpServletRequest);
+    String tenantId = httpServletRequest.getHeader(TENANT_ID);
+
     // Check if requester has manage_members permission
     if (!authorizationService.checkPermission(Resource.GROUP, groupId, Permission.MANAGE_MEMBERS, Subject.TENANT,
       tenantId)) {
@@ -119,7 +133,10 @@ public class GroupService {
   /**
    * Grant group access to a resource (only owner or admin can do this)
    */
-  public void grantGroupAccess(String groupId, GroupAccessRequest request, String tenantId) {
+  public void grantGroupAccess(String groupId, GroupAccessRequest request, HttpServletRequest httpServletRequest) {
+    log.info("Grant group access: {}", request);
+    String tenantId = httpServletRequest.getHeader(TENANT_ID);
+
     // Check if requester has manage_members permission on the group
     if (!authorizationService.checkPermission(Resource.GROUP, groupId,
       Permission.MANAGE_MEMBERS, Subject.TENANT, tenantId)) {
@@ -146,7 +163,10 @@ public class GroupService {
   /**
    * Revoke group access from a resource (only owner or admin can do this)
    */
-  public void revokeGroupAccess(String groupId, GroupAccessRequest request, String tenantId) {
+  public void revokeGroupAccess(String groupId, GroupAccessRequest request, HttpServletRequest httpServletRequest) {
+    log.info("Revoke group access: {}", request);
+    String tenantId = httpServletRequest.getHeader(TENANT_ID);
+
     // Check if requester has manage_members permission on the group
     if (!authorizationService.checkPermission(Resource.GROUP, groupId, Permission.MANAGE_MEMBERS,
       Subject.TENANT, tenantId)) {
@@ -173,7 +193,11 @@ public class GroupService {
   /**
    * Delete a group (only owner can do this)
    */
-  public void deleteGroup(String groupId, String tenantId) {
+  public void deleteGroup(String groupId, HttpServletRequest httpServletRequest) {
+    String tenantId = httpServletRequest.getHeader(TENANT_ID);
+
+    log.info("Delete group {} by {}", groupId, tenantId);
+
     // Check if requester is owner
     if (!authorizationService.checkPermission(Resource.GROUP, groupId, Permission.DELETE, Subject.TENANT, tenantId)) {
       throw new ApiException(HttpStatus.FORBIDDEN,
@@ -188,7 +212,11 @@ public class GroupService {
   /**
    * Transfer group ownership (only current owner can do this)
    */
-  public void transferOwnership(String groupId, String newOwnerId, String currentOwnerId) {
+  public void transferOwnership(String groupId, String newOwnerId, HttpServletRequest httpServletRequest) {
+    String currentOwnerId = httpServletRequest.getHeader(TENANT_ID);
+
+    log.info("Transfer ownership of group {}: {}", groupId, currentOwnerId);
+
     if (newOwnerId.equals(currentOwnerId)) {
       throw new ApiException(HttpStatus.BAD_REQUEST,
         "New owner must be different from current owner");

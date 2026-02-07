@@ -1,6 +1,5 @@
 package com.acl.project.services;
 
-import com.acl.project.dto.ConditionalPermissionRequest;
 import com.acl.project.dto.RelationshipInfo;
 import com.acl.project.enums.Permission;
 import com.acl.project.enums.Relation;
@@ -11,7 +10,6 @@ import com.google.protobuf.Struct;
 import com.google.protobuf.Value;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -58,14 +56,12 @@ public class AuthorizationService {
     Relation relation,
     Subject subject,
     String subjectId,
-    ConditionalPermissionRequest conditionalPermissionRequest
+    String password
   ) {
 
     // Build caveat context (Struct)
     Struct.Builder contextBuilder = Struct.newBuilder();
-    if (StringUtils.isNotBlank(conditionalPermissionRequest.getPassword())) {
-      contextBuilder.putFields(CAVEAT_KEY, Value.newBuilder().setStringValue(conditionalPermissionRequest.getPassword()).build());
-    }
+    contextBuilder.putFields(CAVEAT_KEY, Value.newBuilder().setStringValue(password).build());
 
     Relationship relationship =
       Relationship.newBuilder()
@@ -130,17 +126,15 @@ public class AuthorizationService {
     Permission permission,
     Subject requesterType,
     String requesterId,
-    ConditionalPermissionRequest conditionalPermissionRequest
+    String password
   ) {
 
     Struct.Builder contextBuilder = Struct.newBuilder();
 
-    if (StringUtils.isNotBlank(conditionalPermissionRequest.getPassword())) {
-      contextBuilder.putFields(
-        CAVEAT_SUPPLIED_KEY,
-        Value.newBuilder().setStringValue(conditionalPermissionRequest.getPassword()).build()
-      );
-    }
+    contextBuilder.putFields(
+      CAVEAT_SUPPLIED_KEY,
+      Value.newBuilder().setStringValue(password).build()
+    );
 
     CheckPermissionRequest request =
       CheckPermissionRequest.newBuilder()
