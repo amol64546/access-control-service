@@ -22,6 +22,7 @@ public class PermissionCheckRequest {
   private Resource resource;
   private String resourceId;
   private Permission permission;
+  private Integer daysFromNow;
 
   @Override
   public String toString() {

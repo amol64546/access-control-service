@@ -53,25 +53,25 @@ public class ResourceController {
 
   @PostMapping("/grant")
   public ResponseEntity<ApiResponse> grant(
-    @RequestBody PermissionRequest permissionRequest,
+    @RequestBody PermissionAccessRequest permissionAccessRequest,
     HttpServletRequest httpServletRequest) {
-    log.info("Grant Request: {}", permissionRequest);
-    resourceService.grantPermission(permissionRequest, httpServletRequest);
+    log.info("Grant Request: {}", permissionAccessRequest);
+    resourceService.grantPermission(permissionAccessRequest, httpServletRequest);
     return ResponseEntity.ok(ApiResponse.builder()
       .msg("Permission granted successfully")
-      .requestBody(permissionRequest)
+      .requestBody(permissionAccessRequest)
       .build());
   }
 
   @DeleteMapping("/revoke")
   public ResponseEntity<ApiResponse> Revoke(
-    @RequestBody PermissionRequest permissionRequest,
+    @RequestBody PermissionAccessRequest permissionAccessRequest,
     HttpServletRequest httpServletRequest) {
-    log.info("Revoke Request: {}", permissionRequest);
-    resourceService.revokePermission(permissionRequest, httpServletRequest);
+    log.info("Revoke Request: {}", permissionAccessRequest);
+    resourceService.revokePermission(permissionAccessRequest, httpServletRequest);
     return ResponseEntity.ok(ApiResponse.builder()
       .msg("Permission revoked successfully")
-      .requestBody(permissionRequest)
+      .requestBody(permissionAccessRequest)
       .build());
   }
 

@@ -1,22 +1,24 @@
 package com.acl.project.services;
 
+import com.acl.project.builders.PermissionOptions;
+import com.acl.project.builders.RelationshipOptions;
 import com.acl.project.dto.RelationshipInfo;
-import com.acl.project.enums.Permission;
 import com.acl.project.enums.Relation;
 import com.acl.project.enums.Resource;
 import com.acl.project.enums.Subject;
 import com.authzed.api.v1.*;
 import com.google.protobuf.Struct;
+import com.google.protobuf.Timestamp;
 import com.google.protobuf.Value;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
-import static com.acl.project.utils.constants.*;
 
 @Service
 @RequiredArgsConstructor
@@ -25,138 +27,82 @@ public class AuthorizationService {
 
   private final PermissionsServiceGrpc.PermissionsServiceBlockingStub permissionsClient;
 
-  public void writeRelationship(Resource resource, String resourceId,
-                                Relation relation, String subject, String subjectId) {
+  public void writeRelationship(RelationshipOptions options) {
+    Relationship.Builder relationshipBuilder = Relationship.newBuilder()
+      .setResource(ObjectReference.newBuilder()
+        .setObjectType(options.getResource().name().toLowerCase())
+        .setObjectId(options.getResourceId())
+        .build())
+      .setRelation(options.getRelation().name().toLowerCase())
+      .setSubject(SubjectReference.newBuilder()
+        .setObject(ObjectReference.newBuilder()
+          .setObjectType(options.getSubject().name().toLowerCase())
+          .setObjectId(options.getSubjectId())
+          .build())
+        .setOptionalRelation(options.getSubRelation() != null ?
+          options.getSubRelation().name().toLowerCase() : "")
+        .build());
+
+    // Add caveat if password is provided
+    if (options.getPassword() != null) {
+      Struct.Builder contextBuilder = Struct.newBuilder();
+      contextBuilder.putFields("caveat_key",
+        Value.newBuilder().setStringValue(options.getPassword()).build());
+
+      relationshipBuilder.setOptionalCaveat(
+        ContextualizedCaveat.newBuilder()
+          .setCaveatName("caveat_name")
+          .setContext(contextBuilder.build())
+          .build());
+    }
+
+    // Add expiration if provided
+    if (options.getDaysFromNow() != null) {
+      Instant expirationTime = Instant.now().plus(options.getDaysFromNow(), ChronoUnit.DAYS);
+      Timestamp expiration = Timestamp.newBuilder()
+        .setSeconds(expirationTime.getEpochSecond())
+        .setNanos(expirationTime.getNano())
+        .build();
+      relationshipBuilder.setOptionalExpiresAt(expiration);
+    }
+
     WriteRelationshipsRequest request = WriteRelationshipsRequest.newBuilder()
       .addUpdates(RelationshipUpdate.newBuilder()
         .setOperation(RelationshipUpdate.Operation.OPERATION_TOUCH)
-        .setRelationship(Relationship.newBuilder()
-          .setResource(ObjectReference.newBuilder()
-            .setObjectType(resource.name().toLowerCase())
-            .setObjectId(resourceId)
-            .build())
-          .setRelation(relation.name().toLowerCase())
-          .setSubject(SubjectReference.newBuilder()
-            .setObject(ObjectReference.newBuilder()
-              .setObjectType(subject.toLowerCase())
-              .setObjectId(subjectId)
-              .build())
-            .build())
-          .build())
+        .setRelationship(relationshipBuilder.build())
         .build())
       .build();
 
     permissionsClient.writeRelationships(request);
+
   }
 
-
-  public void writeRelationship(
-    Resource resourceType,
-    String resourceId,
-    Relation relation,
-    Subject subject,
-    String subjectId,
-    String password
-  ) {
-
-    // Build caveat context (Struct)
-    Struct.Builder contextBuilder = Struct.newBuilder();
-    contextBuilder.putFields(CAVEAT_KEY, Value.newBuilder().setStringValue(password).build());
-
-    Relationship relationship =
-      Relationship.newBuilder()
-        .setResource(
-          ObjectReference.newBuilder()
-            .setObjectType(resourceType.name().toLowerCase())
-            .setObjectId(resourceId)
-            .build())
-        .setRelation(relation.name().toLowerCase())
-        .setSubject(
-          SubjectReference.newBuilder()
-            .setObject(
-              ObjectReference.newBuilder()
-                .setObjectType(subject.name().toLowerCase())
-                .setObjectId(subjectId)
-                .build())
-            .build())
-        .setOptionalCaveat(
-          ContextualizedCaveat.newBuilder()
-            .setCaveatName(CAVEAT_NAME)
-            .setContext(contextBuilder.build())
-            .build())
-        .build();
-
-    WriteRelationshipsRequest request =
-      WriteRelationshipsRequest.newBuilder()
-        .addUpdates(
-          RelationshipUpdate.newBuilder()
-            .setOperation(RelationshipUpdate.Operation.OPERATION_TOUCH)
-            .setRelationship(relationship)
-            .build())
-        .build();
-
-    permissionsClient.writeRelationships(request);
-  }
-
-
-  public boolean checkPermission(Resource resource, String resourceId,
-                                 Permission permission, Subject requesterType, String requesterId) {
-    CheckPermissionRequest request = CheckPermissionRequest.newBuilder()
+  /**
+   * Unified check permission method with optional caveat context
+   */
+  public boolean checkPermission(PermissionOptions options) {
+    CheckPermissionRequest.Builder requestBuilder = CheckPermissionRequest.newBuilder()
       .setResource(ObjectReference.newBuilder()
-        .setObjectType(resource.name().toLowerCase())
-        .setObjectId(resourceId)
+        .setObjectType(options.getResource().name().toLowerCase())
+        .setObjectId(options.getResourceId())
         .build())
-      .setPermission(permission.name().toLowerCase())
+      .setPermission(options.getPermission().name().toLowerCase())
       .setSubject(SubjectReference.newBuilder()
         .setObject(ObjectReference.newBuilder()
-          .setObjectType(requesterType.name().toLowerCase())
-          .setObjectId(requesterId)
+          .setObjectType(options.getSubject().name().toLowerCase())
+          .setObjectId(options.getSubjectId())
           .build())
-        .build())
-      .build();
+        .build());
 
-    CheckPermissionResponse response = permissionsClient.checkPermission(request);
-    return response.getPermissionship() ==
-      CheckPermissionResponse.Permissionship.PERMISSIONSHIP_HAS_PERMISSION;
-  }
+    // Add context if password is provided
+    if (options.getPassword() != null) {
+      Struct.Builder contextBuilder = Struct.newBuilder();
+      contextBuilder.putFields("caveat_supplied_key",
+        Value.newBuilder().setStringValue(options.getPassword()).build());
+      requestBuilder.setContext(contextBuilder.build());
+    }
 
-  public boolean checkPermission(
-    Resource resourceType,
-    String resourceId,
-    Permission permission,
-    Subject requesterType,
-    String requesterId,
-    String password
-  ) {
-
-    Struct.Builder contextBuilder = Struct.newBuilder();
-
-    contextBuilder.putFields(
-      CAVEAT_SUPPLIED_KEY,
-      Value.newBuilder().setStringValue(password).build()
-    );
-
-    CheckPermissionRequest request =
-      CheckPermissionRequest.newBuilder()
-        .setResource(
-          ObjectReference.newBuilder()
-            .setObjectType(resourceType.name().toLowerCase())
-            .setObjectId(resourceId)
-            .build())
-        .setPermission(permission.name().toLowerCase())
-        .setSubject(
-          SubjectReference.newBuilder()
-            .setObject(
-              ObjectReference.newBuilder()
-                .setObjectType(requesterType.name().toLowerCase())
-                .setObjectId(requesterId)
-                .build())
-            .build())
-        .setContext(contextBuilder.build())
-        .build();
-
-    CheckPermissionResponse response =
-      permissionsClient.checkPermission(request);
+    CheckPermissionResponse response = permissionsClient.checkPermission(requestBuilder.build());
     return response.getPermissionship() ==
       CheckPermissionResponse.Permissionship.PERMISSIONSHIP_HAS_PERMISSION;
   }

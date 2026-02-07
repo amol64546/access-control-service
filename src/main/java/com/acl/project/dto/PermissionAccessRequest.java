@@ -15,12 +15,14 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class PermissionRequest {
+public class PermissionAccessRequest {
 
   private String userId;
   private Resource resource;
   private String resourceId;
   private Relation relation;
+  private Integer daysFromNow;
+
 
   @Override
   public String toString() {

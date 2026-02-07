@@ -1,5 +1,6 @@
 package com.acl.project.services;
 
+import com.acl.project.builders.PermissionOptions;
 import com.acl.project.dto.HierarchyRelation;
 import com.acl.project.dto.HierarchyResponse;
 import com.acl.project.dto.HierarchySummary;
@@ -33,8 +34,10 @@ public class HierarchyService {
     log.info("Getting complete hierarchy for {}:{}", resource, resourceId);
     String tenantId = httpServletRequest.getHeader(TENANT_ID);
 
-    if (!authorizationService.checkPermission(resource, resourceId,
-      Permission.READ, Subject.TENANT, tenantId)) {
+    if (!authorizationService.checkPermission(PermissionOptions.builder()
+      .resource(resource).resourceId(resourceId)
+      .subject(Subject.TENANT).subjectId(tenantId)
+      .permission(Permission.READ).build())) {
       throw new ApiException(HttpStatus.FORBIDDEN,
         "Subject does not have view permission.");
     }
@@ -128,8 +131,10 @@ public class HierarchyService {
 
     for (RelationshipInfo rel : incomingRelations) {
       // Check if user has permission to view this child
-      if (!authorizationService.checkPermission(rel.getResource(), rel.getResourceId(),
-        Permission.READ, Subject.TENANT, userId)) {
+      if (!authorizationService.checkPermission(PermissionOptions.builder()
+        .resource(rel.getResource()).resourceId(rel.getResourceId())
+        .subject(Subject.TENANT).subjectId(userId)
+        .permission(Permission.READ).build())) {
         continue;
       }
 

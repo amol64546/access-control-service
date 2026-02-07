@@ -1,5 +1,7 @@
 package com.acl.project.services;
 
+import com.acl.project.builders.PermissionOptions;
+import com.acl.project.builders.RelationshipOptions;
 import com.acl.project.dto.GroupAccessRequest;
 import com.acl.project.enums.Permission;
 import com.acl.project.enums.Relation;
@@ -12,7 +14,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import static com.acl.project.utils.constants.*;
+import static com.acl.project.utils.constants.MEMBER;
+import static com.acl.project.utils.constants.TENANT_ID;
 
 @Slf4j
 @Service
@@ -29,9 +32,12 @@ public class GroupService {
 
     // Set the creator as owner
     authorizationService.writeRelationship(
-      Resource.GROUP, groupId,
-      Relation.OWNER, TENANT, tenantId
+      RelationshipOptions.builder()
+        .resource(Resource.GROUP).resourceId(groupId)
+        .subject(Subject.TENANT).subjectId(tenantId)
+        .relation(Relation.OWNER).build()
     );
+
     log.info("Created group {} with owner {}", groupId, tenantId);
   }
 
@@ -43,16 +49,21 @@ public class GroupService {
     String tenantId = httpServletRequest.getHeader(TENANT_ID);
 
     // Check if requester is owner
-    if (!authorizationService.checkPermission(Resource.GROUP, groupId, Permission.DELETE,
-      Subject.TENANT, tenantId)) {
+    if (!authorizationService.checkPermission(PermissionOptions.builder()
+      .resource(Resource.GROUP).resourceId(groupId)
+      .subject(Subject.TENANT).subjectId(tenantId)
+      .permission(Permission.DELETE).build())) {
       throw new ApiException(HttpStatus.FORBIDDEN,
         "Only group owner can add admins");
     }
 
     authorizationService.writeRelationship(
-      Resource.GROUP, groupId,
-      Relation.ADMIN, TENANT, adminId
+      RelationshipOptions.builder()
+        .resource(Resource.GROUP).resourceId(groupId)
+        .subject(Subject.TENANT).subjectId(adminId)
+        .relation(Relation.ADMIN).build()
     );
+
     log.info("Added admin {} to group {} by {}", adminId,
       groupId, tenantId);
   }
@@ -65,8 +76,10 @@ public class GroupService {
     String tenantId = httpServletRequest.getHeader(TENANT_ID);
 
     // Check if requester is owner
-    if (!authorizationService.checkPermission(Resource.GROUP, groupId, Permission.DELETE,
-      Subject.TENANT, tenantId)) {
+    if (!authorizationService.checkPermission(PermissionOptions.builder()
+      .resource(Resource.GROUP).resourceId(groupId)
+      .subject(Subject.TENANT).subjectId(tenantId)
+      .permission(Permission.DELETE).build())) {
       throw new ApiException(HttpStatus.FORBIDDEN,
         "Only group owner can remove admins");
     }
@@ -87,15 +100,18 @@ public class GroupService {
     String tenantId = httpServletRequest.getHeader(TENANT_ID);
 
     // Check if requester has manage_members permission
-    if (!authorizationService.checkPermission(Resource.GROUP, groupId, Permission.MANAGE_MEMBERS,
-      Subject.TENANT, tenantId)) {
+    if (!authorizationService.checkPermission(PermissionOptions.builder()
+      .resource(Resource.GROUP).resourceId(groupId)
+      .subject(Subject.TENANT).subjectId(tenantId)
+      .permission(Permission.MANAGE_MEMBERS).build())) {
       throw new ApiException(HttpStatus.FORBIDDEN,
         "Only group owner or admin can add members");
     }
-
     authorizationService.writeRelationship(
-      Resource.GROUP, groupId,
-      Relation.MEMBER, TENANT, memberId
+      RelationshipOptions.builder()
+        .resource(Resource.GROUP).resourceId(groupId)
+        .subject(Subject.TENANT).subjectId(memberId)
+        .relation(Relation.MEMBER).build()
     );
     log.info("Added member {} to group {} by {}", memberId,
       groupId, tenantId);
@@ -109,15 +125,19 @@ public class GroupService {
     String tenantId = httpServletRequest.getHeader(TENANT_ID);
 
     // Check if requester has manage_members permission
-    if (!authorizationService.checkPermission(Resource.GROUP, groupId, Permission.MANAGE_MEMBERS, Subject.TENANT,
-      tenantId)) {
+    if (!authorizationService.checkPermission(PermissionOptions.builder()
+      .resource(Resource.GROUP).resourceId(groupId)
+      .subject(Subject.TENANT).subjectId(tenantId)
+      .permission(Permission.MANAGE_MEMBERS).build())) {
       throw new ApiException(HttpStatus.FORBIDDEN,
         "Only group owner or admin can remove members");
     }
 
     // Prevent removing owner
-    if (authorizationService.checkPermission(Resource.GROUP, groupId, Permission.DELETE, Subject.TENANT,
-      memberId)) {
+    if (!authorizationService.checkPermission(PermissionOptions.builder()
+      .resource(Resource.GROUP).resourceId(groupId)
+      .subject(Subject.TENANT).subjectId(tenantId)
+      .permission(Permission.DELETE).build())) {
       throw new ApiException(HttpStatus.BAD_REQUEST,
         "Cannot remove group owner");
     }
@@ -138,15 +158,19 @@ public class GroupService {
     String tenantId = httpServletRequest.getHeader(TENANT_ID);
 
     // Check if requester has manage_members permission on the group
-    if (!authorizationService.checkPermission(Resource.GROUP, groupId,
-      Permission.MANAGE_MEMBERS, Subject.TENANT, tenantId)) {
+    if (!authorizationService.checkPermission(PermissionOptions.builder()
+      .resource(Resource.GROUP).resourceId(groupId)
+      .subject(Subject.TENANT).subjectId(tenantId)
+      .permission(Permission.MANAGE_MEMBERS).build())) {
       throw new ApiException(HttpStatus.FORBIDDEN,
         "Only group owner or admin can grant group access");
     }
 
     // Also check if requester has grant permission on the resource
-    if (!authorizationService.checkPermission(request.getResource(),
-      request.getResourceId(), Permission.GRANT, Subject.TENANT, tenantId)) {
+    if (!authorizationService.checkPermission(PermissionOptions.builder()
+      .resource(request.getResource()).resourceId(request.getResourceId())
+      .subject(Subject.TENANT).subjectId(tenantId)
+      .permission(Permission.GRANT).build())) {
       throw new ApiException(HttpStatus.FORBIDDEN,
         "You don't have permission to grant access to this resource");
     }
@@ -168,15 +192,19 @@ public class GroupService {
     String tenantId = httpServletRequest.getHeader(TENANT_ID);
 
     // Check if requester has manage_members permission on the group
-    if (!authorizationService.checkPermission(Resource.GROUP, groupId, Permission.MANAGE_MEMBERS,
-      Subject.TENANT, tenantId)) {
+    if (!authorizationService.checkPermission(PermissionOptions.builder()
+      .resource(Resource.GROUP).resourceId(groupId)
+      .subject(Subject.TENANT).subjectId(tenantId)
+      .permission(Permission.MANAGE_MEMBERS).build())) {
       throw new ApiException(HttpStatus.FORBIDDEN,
         "Only group owner or admin can revoke group access");
     }
 
     // Also check if requester has revoke permission on the resource
-    if (!authorizationService.checkPermission(request.getResource(), request.getResourceId(),
-      Permission.REVOKE, Subject.TENANT, tenantId)) {
+    if (!authorizationService.checkPermission(PermissionOptions.builder()
+      .resource(request.getResource()).resourceId(request.getResourceId())
+      .subject(Subject.TENANT).subjectId(tenantId)
+      .permission(Permission.REVOKE).build())) {
       throw new ApiException(HttpStatus.FORBIDDEN,
         "You don't have permission to revoke access from this resource");
     }
@@ -199,7 +227,10 @@ public class GroupService {
     log.info("Delete group {} by {}", groupId, tenantId);
 
     // Check if requester is owner
-    if (!authorizationService.checkPermission(Resource.GROUP, groupId, Permission.DELETE, Subject.TENANT, tenantId)) {
+    if (!authorizationService.checkPermission(PermissionOptions.builder()
+      .resource(Resource.GROUP).resourceId(groupId)
+      .subject(Subject.TENANT).subjectId(tenantId)
+      .permission(Permission.DELETE).build())) {
       throw new ApiException(HttpStatus.FORBIDDEN,
         "Only group owner can delete the group");
     }
@@ -223,12 +254,18 @@ public class GroupService {
     }
 
     // Check if requester is owner
-    if (!authorizationService.checkPermission(Resource.GROUP, groupId, Permission.DELETE, Subject.TENANT, currentOwnerId)) {
+    if (!authorizationService.checkPermission(PermissionOptions.builder()
+      .resource(Resource.GROUP).resourceId(groupId)
+      .subject(Subject.TENANT).subjectId(currentOwnerId)
+      .permission(Permission.DELETE).build())) {
       throw new ApiException(HttpStatus.FORBIDDEN,
         "Only group owner can transfer ownership");
     }
 
-    if (!authorizationService.checkPermission(Resource.GROUP, groupId, Permission.MANAGE_MEMBERS, Subject.TENANT, newOwnerId)) {
+    if (!authorizationService.checkPermission(PermissionOptions.builder()
+      .resource(Resource.GROUP).resourceId(groupId)
+      .subject(Subject.TENANT).subjectId(newOwnerId)
+      .permission(Permission.MANAGE_MEMBERS).build())) {
       throw new ApiException(HttpStatus.FORBIDDEN,
         "Only group admin can be owner");
     }
@@ -237,7 +274,12 @@ public class GroupService {
     authorizationService.deleteRelationship(Resource.GROUP, groupId, Relation.OWNER, Subject.TENANT, currentOwnerId);
 
     // Set new owner
-    authorizationService.writeRelationship(Resource.GROUP, groupId, Relation.OWNER, TENANT, newOwnerId);
+    authorizationService.writeRelationship(
+      RelationshipOptions.builder()
+        .resource(Resource.GROUP).resourceId(groupId)
+        .subject(Subject.TENANT).subjectId(newOwnerId)
+        .relation(Relation.OWNER).build()
+    );
 
     log.info("Transferred ownership of group {} from {} to {}", groupId, currentOwnerId, newOwnerId);
   }
