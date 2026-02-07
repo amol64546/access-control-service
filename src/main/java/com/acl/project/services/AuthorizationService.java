@@ -53,7 +53,6 @@ public class AuthorizationService {
         .setRelation(options.getRelation().name().toLowerCase())
         .setSubject(subjectBuilder.build());
 
-
     // Add caveat if password is provided
     if (options.getPassword() != null) {
       Struct.Builder contextBuilder = Struct.newBuilder();
