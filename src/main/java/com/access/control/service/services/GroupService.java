@@ -7,12 +7,12 @@ import com.access.control.service.enums.Permission;
 import com.access.control.service.enums.Relation;
 import com.access.control.service.enums.Resource;
 import com.access.control.service.enums.Subject;
-import com.access.control.service.exception.ApiException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -55,7 +55,7 @@ public class GroupService {
       .resource(Resource.GROUP).resourceId(groupId)
       .subject(Subject.TENANT).subjectId(tenantId)
       .permission(Permission.WRITE).build())) {
-      throw new ApiException(HttpStatus.FORBIDDEN,
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
         "Only group owner or admin can add members");
     }
     authorizationService.writeRelationship(
@@ -80,7 +80,7 @@ public class GroupService {
       .resource(Resource.GROUP).resourceId(groupId)
       .subject(Subject.TENANT).subjectId(tenantId)
       .permission(Permission.WRITE).build())) {
-      throw new ApiException(HttpStatus.FORBIDDEN,
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
         "Only group owner or admin can remove members");
     }
 
@@ -89,7 +89,7 @@ public class GroupService {
       .resource(Resource.GROUP).resourceId(groupId)
       .subject(Subject.TENANT).subjectId(tenantId)
       .permission(Permission.DELETE).build())) {
-      throw new ApiException(HttpStatus.BAD_REQUEST,
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
         "Cannot remove group owner");
     }
 
@@ -113,7 +113,7 @@ public class GroupService {
       .resource(Resource.GROUP).resourceId(groupId)
       .subject(Subject.TENANT).subjectId(tenantId)
       .permission(Permission.WRITE).build())) {
-      throw new ApiException(HttpStatus.FORBIDDEN,
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
         "Only group owner or admin can grant group access");
     }
 
@@ -122,7 +122,7 @@ public class GroupService {
       .resource(request.getResource()).resourceId(request.getResourceId())
       .subject(Subject.TENANT).subjectId(tenantId)
       .permission(Permission.GRANT).build())) {
-      throw new ApiException(HttpStatus.FORBIDDEN,
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
         "You don't have permission to grant access to this resource");
     }
     authorizationService.writeRelationship(RelationshipOptions.builder()
@@ -149,7 +149,7 @@ public class GroupService {
       .resource(Resource.GROUP).resourceId(groupId)
       .subject(Subject.TENANT).subjectId(tenantId)
       .permission(Permission.WRITE).build())) {
-      throw new ApiException(HttpStatus.FORBIDDEN,
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
         "Only group owner or admin can revoke group access");
     }
 
@@ -158,7 +158,7 @@ public class GroupService {
       .resource(request.getResource()).resourceId(request.getResourceId())
       .subject(Subject.TENANT).subjectId(tenantId)
       .permission(Permission.REVOKE).build())) {
-      throw new ApiException(HttpStatus.FORBIDDEN,
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
         "You don't have permission to revoke access from this resource");
     }
 
@@ -184,7 +184,7 @@ public class GroupService {
       .resource(Resource.GROUP).resourceId(groupId)
       .subject(Subject.TENANT).subjectId(tenantId)
       .permission(Permission.DELETE).build())) {
-      throw new ApiException(HttpStatus.FORBIDDEN,
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
         "Only group owner can delete the group");
     }
 
@@ -206,7 +206,7 @@ public class GroupService {
         .permission(Permission.READ)
         .build())) {
 
-      throw new ApiException(HttpStatus.FORBIDDEN,
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
         "Only group owner can view members");
     }
 

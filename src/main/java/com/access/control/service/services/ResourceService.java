@@ -9,13 +9,13 @@ import com.access.control.service.enums.Permission;
 import com.access.control.service.enums.Relation;
 import com.access.control.service.enums.Resource;
 import com.access.control.service.enums.Subject;
-import com.access.control.service.exception.ApiException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import static com.access.control.service.utils.constants.PASSWORD;
 import static com.access.control.service.utils.constants.TENANT_ID;
@@ -117,7 +117,7 @@ public class ResourceService {
 
   private void validateRelation(Relation relation) {
     if (relation.equals(Relation.OWNER)) {
-      throw new ApiException(HttpStatus.BAD_REQUEST,
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
         "Subject is the owner of resource.");
     }
   }
@@ -129,7 +129,7 @@ public class ResourceService {
       .resource(resourceType).resourceId(resourceId)
       .subject(Subject.TENANT).subjectId(subjectId)
       .permission(permission).build())) {
-      throw new ApiException(HttpStatus.FORBIDDEN,
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
         "Subject does not have %s permission.".formatted(permission));
     }
   }

@@ -6,13 +6,12 @@ import com.access.control.service.dto.HierarchyResponse;
 import com.access.control.service.dto.HierarchySummary;
 import com.access.control.service.dto.RelationshipInfo;
 import com.access.control.service.enums.*;
-import com.acl.project.enums.*;
-import com.access.control.service.exception.ApiException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -39,7 +38,7 @@ public class HierarchyService {
       .resource(resource).resourceId(resourceId)
       .subject(Subject.TENANT).subjectId(tenantId)
       .permission(Permission.READ).build())) {
-      throw new ApiException(HttpStatus.FORBIDDEN,
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
         "Subject does not have view permission.");
     }
 
